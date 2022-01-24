@@ -9,6 +9,9 @@
   },
   "dependencies": {
     "core-js": "^3.6.5",
+    "sass": "^1.49.0",
+    "sass-loader": "^10.2.1",
+    "tone": "^14.7.77",
     "vue": "^2.6.11"
   },
   "devDependencies": {
