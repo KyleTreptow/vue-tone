@@ -1,17 +1,16 @@
 <template>
   <div id="app" class="app">
-    <!-- <img class="logo" alt="Vue logo" src="./assets/logo.png"> -->
-    <HelloWorld msg="Tone and Vue.js"/>
+    <Scales msg="Tone and Vue.js" />
   </div>
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld.vue'
+import Scales from './components/Scales.vue'
 
 export default {
   name: 'App',
   components: {
-    HelloWorld
+    Scales
   }
 }
 </script>

@@ -163,7 +163,9 @@ export default {
       let notes = [...this.modeNotes]
       let array = []
       for (let i = 0; i < 8; i++) {
-        array.push(notes[Math.floor(Math.random() * 8)])
+        let rand = Math.floor(Math.random() * 9)
+        if(rand == 9){ array.push(null) } // push rest (null) note
+        else { array.push(notes[rand]) } // push random note from mode
       }
       return array
     }
