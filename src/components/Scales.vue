@@ -15,6 +15,12 @@
         </select>
       </div>
       <div class="block">
+        Synth Wave Form:
+        <select v-model="synthWaveForm">
+          <option v-for="wf in waveForms" :value="wf" :key="wf">{{ wf }}</option>
+        </select>
+      </div>
+      <div class="block">
         <button v-for="note in notesFromKey"
           :key="'note-'+note"
           class="note-item"
@@ -23,6 +29,19 @@
             inactive: !modeNotes.includes(note),
             off: !showOffKeys,
             live: note == liveNote
+          }"
+          @click="startAudio(note)">{{ note }}</button>
+      </div>
+
+      <div class="block">
+        <button v-for="note in notesFromKey"
+          :key="'note-'+note"
+          class="note-item"
+          :class="{
+            active: modeNotes.includes(note),
+            inactive: !modeNotes.includes(note),
+            off: !showOffKeys,
+            live: note == liveBassNote
           }"
           @click="startAudio(note)">{{ note }}</button>
       </div>
@@ -59,6 +78,16 @@ export default {
   data(){
     return {
       synth: null,
+      synthWaveForm: 'triangle',
+      bass: null,
+      waveForms: ['sine', 'square', 'triangle', 'sawtooth'],
+      effects: {
+        fbDelay: null,
+        reverb: null,
+        chorus: null,
+        distortion: null,
+        phaser: null
+      },
       activeKey: 'C',
       octave: 4,
       activeMode: 'aeolian',
@@ -76,14 +105,22 @@ export default {
       showOffKeys: true,
       playing: false,
       synthPart: null,
-      liveNote: null
+      liveNote: null,
+      liveBassNote: null
     }
   },
   props: {
     msg: String
   },
   mounted() {
-    this.synth = new Tone.Synth().toDestination()
+    // Init Synths & Effects
+    this.effects.fbDelay = new Tone.FeedbackDelay("8n", 0.35).toDestination();
+    this.synth = new Tone.Synth().connect(this.effects.fbDelay);
+
+    // this.synth = new Tone.Synth().toDestination();
+
+    // Init Bass & Effects
+
   },
   computed: {
     notesFromKey(){
@@ -168,6 +205,11 @@ export default {
         else { array.push(notes[rand]) } // push random note from mode
       }
       return array
+    }
+  },
+  watch: {
+    synthWaveForm() {
+      this.synth.oscillator.type = this.synthWaveForm
     }
   }
 }
