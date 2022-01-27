@@ -55,7 +55,7 @@
 <script>
 import * as Tone from 'tone'
 export default {
-  name: 'HelloWorld',
+  name: 'Scales',
   data(){
     return {
       synth: null,
