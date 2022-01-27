@@ -32,7 +32,12 @@
           }"
           @click="startAudio(note)">{{ note }}</button>
       </div>
-
+      <div class="block">
+        Bass Wave Form:
+        <select v-model="bassWaveForm">
+          <option v-for="wf in waveForms" :value="wf" :key="wf">{{ wf }}</option>
+        </select>
+      </div>
       <div class="block">
         <button v-for="note in notesFromKey"
           :key="'note-'+note"
@@ -43,15 +48,15 @@
             off: !showOffKeys,
             live: note == liveBassNote
           }"
-          @click="startAudio(note)">{{ note }}</button>
+          @click="startBassAudio(note)">{{ note }}</button>
       </div>
       <div class="block">
-        <button class="seq-btn" @click="playScale(modeNotes)">
+        <!-- <button class="seq-btn" @click="playScale(modeNotes)">
           Play Scale
-        </button>
-        <button class="seq-btn" @click="playScale(suffleNotes())">
+        </button> -->
+        <!-- <button class="seq-btn" @click="playScale(suffleNotes())">
           Play Shuffle
-        </button>
+        </button> -->
         <button class="seq-btn" @click="playScale(randomNotes())">
           Play Random
         </button>
@@ -80,6 +85,7 @@ export default {
       synth: null,
       synthWaveForm: 'triangle',
       bass: null,
+      bassWaveForm: 'triangle',
       waveForms: ['sine', 'square', 'triangle', 'sawtooth'],
       effects: {
         fbDelay: null,
@@ -116,10 +122,8 @@ export default {
     // Init Synths & Effects
     this.effects.fbDelay = new Tone.FeedbackDelay("8n", 0.35).toDestination();
     this.synth = new Tone.Synth().connect(this.effects.fbDelay);
-
-    // this.synth = new Tone.Synth().toDestination();
-
     // Init Bass & Effects
+    this.bass = new Tone.Synth().toDestination();
 
   },
   computed: {
@@ -151,6 +155,9 @@ export default {
     },
     startAudio(note) {
       this.synth.triggerAttackRelease(note, "8n")
+    },
+    startBassAudio(note) {
+      this.bass.triggerAttackRelease(note, "4n")
     },
     randomize(){
       let octaveNum = 5
@@ -210,6 +217,9 @@ export default {
   watch: {
     synthWaveForm() {
       this.synth.oscillator.type = this.synthWaveForm
+    },
+    bassWaveForm() {
+      // this.bass.oscillator.type = this.bassWaveForm
     }
   }
 }
