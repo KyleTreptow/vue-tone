@@ -27,12 +27,6 @@
           @click="startAudio(note)">{{ note }}</button>
       </div>
       <div class="block">
-        <button class="seq-btn" @click="playScale(modeNotes)">
-          Play Scale
-        </button>
-        <button class="seq-btn" @click="playScale(suffleNotes())">
-          Play Shuffle
-        </button>
         <button class="seq-btn" @click="playScale(randomNotes())">
           Play Random
         </button>
@@ -41,9 +35,6 @@
     <footer>
       <button class="foot-link" @click="showOffKeys = !showOffKeys">
         {{ showOffKeys ? 'Hide' : 'Show' }} Off Keys
-      </button>
-      <button class="foot-link" @click="log(synth)">
-        Log Synth
       </button>
       <button class="foot-link" @click="randomize()">
         Randomize
@@ -84,6 +75,7 @@ export default {
   },
   mounted() {
     this.synth = new Tone.Synth().toDestination()
+    this.synth.oscillator.type = "sine"
   },
   computed: {
     notesFromKey(){
