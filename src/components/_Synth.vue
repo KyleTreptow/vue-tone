@@ -67,11 +67,21 @@ export default {
       showOffKeys: true,
       playing: false,
       synthPart: null,
-      liveNote: null
+      liveNote: null,
+      effects: {
+        fbDelay: null,
+        reverb: null,
+        chorus: null,
+        distortion: null,
+        phaser: null
+      }
     }
   },
   mounted() {
-    this.synth = new Tone.Synth().toDestination()
+    // Init Synths & Effects
+    this.effects.fbDelay = new Tone.FeedbackDelay("8n", 0.35).toDestination();
+    this.synth = new Tone.Synth().connect(this.effects.fbDelay);
+    // this.synth = new Tone.Synth().toDestination()
   },
   computed: {
     notesFromKey(){
@@ -127,6 +137,7 @@ export default {
         n, d
       );
       this.synthPart.start()
+      Tone.Transport.bpm.value = 120
       if (!this.playing) {
         Tone.Transport.start()
         this.playing = true
