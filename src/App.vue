@@ -6,8 +6,19 @@
     <High :notes="notes" :modes="modes" :scales="scales" ref="high"/>
     <Melody :notes="notes" :modes="modes" :scales="scales" ref="melody"/>
     <Bass :notes="notes" :modes="modes" :scales="scales" ref="bass" />
+    <Sub :notes="notes" :modes="modes" :scales="scales" ref="sub" />
 
-    <button type="button" @click="fire()">Test</button>
+    <div class="bpm">
+      <b>BPM: {{ bpm }}</b>
+      <div>
+        <input type="range"
+         min="70" max="200"
+         v-model="bpm"
+         @change="changeBpm(bpm)" >
+      </div>
+    </div>
+
+    <button type="button" @click="play()">Play</button>
 
     <!-- <footer>
       Footer
@@ -17,13 +28,17 @@
 </template>
 
 <script>
+
+import * as Tone from 'tone'
 import High from './components/High.vue'
 import Melody from './components/Melody.vue'
 import Bass from './components/Bass.vue'
+import Sub from './components/Sub.vue'
+
 export default {
   name: 'App',
   components: {
-    High, Melody, Bass
+    High, Melody, Bass, Sub
   },
   data(){
     return {
@@ -37,14 +52,22 @@ export default {
         mixolydian: [2, 2, 1, 2, 2, 1, 2],
         aeolian:    [2, 1, 2, 2, 1, 2, 2],
         locrian:    [1, 2, 2, 1, 2, 2, 2]
-      }
+      },
+      bpm: 120
     }
   },
+  mounted(){
+    Tone.Transport.bpm.value = this.bpm
+  },
   methods: {
-    fire(){
+    play(){
       this.$refs.high.playRandomSequence("8n")
-      this.$refs.melody.playRandomSequence("8n")
-      this.$refs.bass.playRandomSequence("8n")
+      this.$refs.melody.playRandomSequence("4n")
+      this.$refs.bass.playRandomSequence("2n")
+      this.$refs.sub.playRandomSequence("1n")
+    },
+    changeBpm(bpm){
+      Tone.Transport.bpm.value = bpm
     }
   }
 }

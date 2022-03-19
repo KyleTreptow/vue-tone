@@ -2,13 +2,15 @@
 // import * as Tone from 'tone'
 import Synth from './_Synth.vue'
 export default {
-  name: 'Melody',
+  name: 'Sub',
   extends: Synth,
   data(){
     return {
-      name: 'Mid',
-      octave: 4
+      name: 'Sub',
+      octave: 2,
+      synthWaveForm: 'sine'
     }
-  }
+  },
+  methods: {}
 }
 </script>

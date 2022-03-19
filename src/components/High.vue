@@ -6,6 +6,7 @@ export default {
   extends: Synth,
   data(){
     return {
+      name: 'High',
       octave: 5
     }
   },

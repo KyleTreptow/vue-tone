@@ -6,7 +6,9 @@ export default {
   extends: Synth,
   data(){
     return {
-      octave: 3
+      name: 'Bass',
+      octave: 3,
+      synthWaveForm: 'sine'
     }
   },
   methods: {}

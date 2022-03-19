@@ -2,6 +2,7 @@
   <div class="">
     <main>
       <div class="block">
+        <span><b>{{ name }}: &nbsp; </b></span>
         <select v-model="activeKey">
           <option v-for="note in notes" :value="note" :key="note">{{ note }}</option>
         </select>
@@ -61,6 +62,7 @@ export default {
   props: ['notes', 'modes', 'scales'],
   data(){
     return {
+      name: 'Synth',
       synth: null,
       activeKey: 'C',
       octave: 4,
@@ -70,7 +72,7 @@ export default {
       synthPart: null,
       liveNote: null,
       synthWaveForm: 'triangle',
-      waveForms: ['sine', 'square', 'triangle', 'sawtooth'],
+      waveForms: ['sine', 'triangle', 'square', 'sawtooth'],
       effects: {
         fbDelay: null,
         reverb: null,
@@ -139,7 +141,6 @@ export default {
         n, d
       );
       this.synthPart.start()
-      Tone.Transport.bpm.value = 100
       if (!this.playing) {
         Tone.Transport.start()
         this.playing = true
