@@ -11,6 +11,9 @@
         <select v-model="activeMode">
           <option v-for="mode in modes" :value="mode" :key="mode">{{ mode }}</option>
         </select>
+        <select v-model="synthWaveForm">
+          <option v-for="wf in waveForms" :value="wf" :key="wf">{{ wf }}</option>
+        </select>
       </div>
       <div class="block">
         <button v-for="note in notesFromKey"
@@ -24,10 +27,7 @@
           }"
           @click="startAudio(note)">{{ note }}</button>
       </div>
-      <div class="block">
-        Notes:
-      </div>
-      <div class="block">
+      <!-- <div class="block">
         <button class="seq-btn" @click="playSequence(modeNotes)">
           Play Scale
         </button>
@@ -38,7 +38,7 @@
           Play Random
         </button>
       </div>
-    </main>
+
     <div>
       <button class="foot-link" @click="showOffKeys = !showOffKeys">
         {{ showOffKeys ? 'Hide' : 'Show' }} Off Keys
@@ -49,7 +49,8 @@
       <button class="foot-link" @click="randomize()">
         Randomize
       </button>
-    </div>
+    </div> -->
+    </main>
   </div>
 </template>
 
@@ -68,6 +69,8 @@ export default {
       playing: false,
       synthPart: null,
       liveNote: null,
+      synthWaveForm: 'triangle',
+      waveForms: ['sine', 'square', 'triangle', 'sawtooth'],
       effects: {
         fbDelay: null,
         reverb: null,
@@ -121,14 +124,13 @@ export default {
       this.activeKey = this.notes[Math.floor(Math.random() * notesNum)]
       this.activeMode = this.modes[Math.floor(Math.random() * modesNum)]
     },
-    playSequence(notes, duration){
+    playSequence(notes, d = "8n"){
       let that = this
       if (Tone.context.state !== 'running') {
         Tone.context.resume()
       }
       let s = this.synth
       let n = notes
-      let d = duration || "8n"
       this.synthPart = new Tone.Sequence(
         function(time, note) {
           s.triggerAttackRelease(note, "10hz", time)
@@ -137,7 +139,7 @@ export default {
         n, d
       );
       this.synthPart.start()
-      Tone.Transport.bpm.value = 120
+      Tone.Transport.bpm.value = 100
       if (!this.playing) {
         Tone.Transport.start()
         this.playing = true
@@ -165,12 +167,17 @@ export default {
     randomNotes(){
       let notes = [...this.modeNotes]
       let array = []
-      for (let i = 0; i < 8; i++) {
+      for (let i = 0; i < 16; i++) {
         let rand = Math.floor(Math.random() * 9)
         if(rand == 9){ array.push(null) } // push rest (null) note
         else { array.push(notes[rand]) } // push random note from mode
       }
       return array
+    }
+  },
+  watch: {
+    synthWaveForm() {
+      this.synth.oscillator.type = this.synthWaveForm
     }
   }
 }

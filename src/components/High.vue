@@ -2,11 +2,11 @@
 // import * as Tone from 'tone'
 import Synth from './_Synth.vue'
 export default {
-  name: 'Bass',
+  name: 'High',
   extends: Synth,
   data(){
     return {
-      octave: 3
+      octave: 5
     }
   },
   methods: {}

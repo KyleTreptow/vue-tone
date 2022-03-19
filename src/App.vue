@@ -3,25 +3,27 @@
     <h1>Tone and Vue.js</h1>
     <h2>Key + Octave + Mode</h2>
 
+    <High :notes="notes" :modes="modes" :scales="scales" ref="high"/>
     <Melody :notes="notes" :modes="modes" :scales="scales" ref="melody"/>
     <Bass :notes="notes" :modes="modes" :scales="scales" ref="bass" />
 
     <button type="button" @click="fire()">Test</button>
 
-    <footer>
+    <!-- <footer>
       Footer
-    </footer>
+    </footer> -->
 
   </div>
 </template>
 
 <script>
+import High from './components/High.vue'
 import Melody from './components/Melody.vue'
 import Bass from './components/Bass.vue'
 export default {
   name: 'App',
   components: {
-    Melody, Bass
+    High, Melody, Bass
   },
   data(){
     return {
@@ -40,8 +42,9 @@ export default {
   },
   methods: {
     fire(){
+      this.$refs.high.playRandomSequence("8n")
       this.$refs.melody.playRandomSequence("8n")
-      this.$refs.bass.playRandomSequence("4n")
+      this.$refs.bass.playRandomSequence("8n")
     }
   }
 }
