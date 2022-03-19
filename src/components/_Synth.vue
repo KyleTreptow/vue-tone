@@ -1,9 +1,7 @@
 <template>
   <div class="">
     <main>
-      <h1>{{ msg }}</h1>
       <div class="block">
-        <h2>Key + Octave + Mode</h2>
         <select v-model="activeKey">
           <option v-for="note in notes" :value="note" :key="note">{{ note }}</option>
         </select>
@@ -27,18 +25,21 @@
           @click="startAudio(note)">{{ note }}</button>
       </div>
       <div class="block">
-        <button class="seq-btn" @click="playScale(modeNotes)">
+        Notes:
+      </div>
+      <div class="block">
+        <button class="seq-btn" @click="playSequence(modeNotes)">
           Play Scale
         </button>
-        <button class="seq-btn" @click="playScale(suffleNotes())">
+        <button class="seq-btn" @click="playSequence(suffleNotes())">
           Play Shuffle
         </button>
-        <button class="seq-btn" @click="playScale(randomNotes())">
+        <button class="seq-btn" @click="playRandomSequence()">
           Play Random
         </button>
       </div>
     </main>
-    <footer>
+    <div>
       <button class="foot-link" @click="showOffKeys = !showOffKeys">
         {{ showOffKeys ? 'Hide' : 'Show' }} Off Keys
       </button>
@@ -48,39 +49,26 @@
       <button class="foot-link" @click="randomize()">
         Randomize
       </button>
-    </footer>
+    </div>
   </div>
 </template>
 
 <script>
 import * as Tone from 'tone'
 export default {
-  name: 'HelloWorld',
+  name: 'Synth',
+  props: ['notes', 'modes', 'scales'],
   data(){
     return {
       synth: null,
       activeKey: 'C',
       octave: 4,
       activeMode: 'aeolian',
-      notes: ['C', 'Db', 'D', 'Eb', 'E', 'F', 'Gb', 'G', 'Ab', 'A', 'Bb', 'B'],
-      modes: ['ionian', 'dorian', 'phrygian', 'lydian', 'mixolydian', 'aeolian', 'locrian'],
-      modeScales: {
-        ionian:     [2, 2, 1, 2, 2, 2, 1],
-        dorian:     [2, 1, 2, 2, 2, 1, 2],
-        phrygian:   [1, 2, 2, 2, 1, 2, 2],
-        lydian:     [2, 2, 2, 1, 2, 2, 1],
-        mixolydian: [2, 2, 1, 2, 2, 1, 2],
-        aeolian:    [2, 1, 2, 2, 1, 2, 2],
-        locrian:    [1, 2, 2, 1, 2, 2, 2]
-      },
       showOffKeys: true,
       playing: false,
       synthPart: null,
       liveNote: null
     }
-  },
-  props: {
-    msg: String
   },
   mounted() {
     this.synth = new Tone.Synth().toDestination()
@@ -97,7 +85,7 @@ export default {
     },
     modeNotes(){
       let notes = this.notesFromKey
-      let modeSteps = this.modeScales[this.activeMode]
+      let modeSteps = this.scales[this.activeMode]
       let modeList = []
       let indexMod = 0
       modeList.push(notes[0])
@@ -123,20 +111,20 @@ export default {
       this.activeKey = this.notes[Math.floor(Math.random() * notesNum)]
       this.activeMode = this.modes[Math.floor(Math.random() * modesNum)]
     },
-    playScale(notes){
+    playSequence(notes, duration){
       let that = this
       if (Tone.context.state !== 'running') {
         Tone.context.resume()
       }
       let s = this.synth
       let n = notes
+      let d = duration || "8n"
       this.synthPart = new Tone.Sequence(
         function(time, note) {
           s.triggerAttackRelease(note, "10hz", time)
           that.liveNote = note
         },
-        n,
-        "8n"
+        n, d
       );
       this.synthPart.start()
       if (!this.playing) {
@@ -148,6 +136,10 @@ export default {
         this.playing = false
         this.liveNote = null
       }
+    },
+    playRandomSequence(duration){
+      let d = duration || "8n"
+      this.playSequence(this.randomNotes(), d)
     },
     suffleNotes(){
       let array = [...this.modeNotes]
@@ -174,14 +166,6 @@ export default {
 </script>
 
 <style lang="sass" scoped>
-  h1
-    color: #2c3e50
-    margin: 0 0 10px 0
-  h2
-    font-size: 14px
-    font-weight: 900
-    text-transform: uppercase
-    margin: 0 0 30px 0
   ul
     list-style-type: none
     padding: 0
@@ -241,27 +225,4 @@ export default {
       background-color: darken(#2c3e50, 5%)
       border: solid 1px darken(#2c3e50, 10%)
       color: #fff
-  footer
-    background: #eee
-    padding: 20px
-    position: absolute
-    bottom: 0
-    left: 0
-    width: 100%
-  .foot-link
-    display: inline-block
-    margin-right: 10px
-    color: #2c3e50
-    background-color: transparent
-    border: solid 1px #2c3e50
-    border-radius: 3px
-    padding: 5px 20px
-    &:last-child
-      margin-right: 0
-    &:hover,
-    &:focus,
-    &:active
-      color: #fff
-      background-color: #42b983
-      border: solid 1px darken(#42b983, 10%)
 </style>
