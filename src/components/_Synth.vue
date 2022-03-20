@@ -15,6 +15,17 @@
         <select v-model="synthWaveForm">
           <option v-for="wf in waveForms" :value="wf" :key="wf">{{ wf }}</option>
         </select>
+        &nbsp;
+        <span>Prase Length:</span>
+        &nbsp;
+        <select v-model="phraseLength">
+          <option value="2" key="2">2</option>
+          <option value="4" key="4">4</option>
+          <option value="8" key="8">8</option>
+          <option value="16" key="16">16</option>
+          <option value="32" key="32">32</option>
+          <option value="64" key="64">64</option>
+        </select>
       </div>
       <div class="block">
         <button v-for="note in notesFromKey"
@@ -27,6 +38,9 @@
             live: note == liveNote
           }"
           @click="startAudio(note)">{{ note }}</button>
+      </div>
+      <div class="block">
+        <span class="seq-array">{{ seqArray }}</span>
       </div>
       <!-- <div class="block">
         <button class="seq-btn" @click="playSequence(modeNotes)">
@@ -67,9 +81,11 @@ export default {
       activeKey: 'C',
       octave: 4,
       activeMode: 'aeolian',
+      phraseLength: 32,
       showOffKeys: true,
       playing: false,
       synthPart: null,
+      seqArray: [],
       liveNote: null,
       synthWaveForm: 'triangle',
       waveForms: ['sine', 'triangle', 'square', 'sawtooth'],
@@ -153,7 +169,9 @@ export default {
     },
     playRandomSequence(duration){
       let d = duration || "8n"
-      this.playSequence(this.randomNotes(), d)
+      let seq = this.randomNotes()
+      this.seqArray = seq
+      this.playSequence(seq, d)
     },
     suffleNotes(){
       let array = [...this.modeNotes]
@@ -168,7 +186,8 @@ export default {
     randomNotes(){
       let notes = [...this.modeNotes]
       let array = []
-      for (let i = 0; i < 16; i++) { // 2, 4, 8, 16, 32, 64 etc.
+      let pl = this.phraseLength
+      for (let i = 0; i < pl; i++) { // phraseLength: 2, 4, 8, 16, 32, 64 etc.
         let rand = Math.floor(Math.random() * 9)
         if(rand == 9){ array.push(null) } // push rest (null) note
         else { array.push(notes[rand]) } // push random note from mode
@@ -187,7 +206,7 @@ export default {
 <style lang="sass" scoped>
   section
     background: #fff
-    padding: 6px 20px 20px 20px
+    padding: 6px 20px 6px 20px
     margin-bottom: 10px
     border-radius: 6px
     border: solid 1px #ddd
@@ -252,4 +271,7 @@ export default {
       background-color: darken(#2c3e50, 5%)
       border: solid 1px darken(#2c3e50, 10%)
       color: #fff
+  .seq-array
+    font-size: 12px
+    color: #999
 </style>
