@@ -1,6 +1,6 @@
 <template>
   <div class="">
-    <main>
+    <section>
       <div class="block">
         <span><b>{{ name }}: &nbsp; </b></span>
         <select v-model="activeKey">
@@ -51,7 +51,7 @@
         Randomize
       </button>
     </div> -->
-    </main>
+  </section>
   </div>
 </template>
 
@@ -168,7 +168,7 @@ export default {
     randomNotes(){
       let notes = [...this.modeNotes]
       let array = []
-      for (let i = 0; i < 16; i++) {
+      for (let i = 0; i < 16; i++) { // 2, 4, 8, 16, 32, 64 etc.
         let rand = Math.floor(Math.random() * 9)
         if(rand == 9){ array.push(null) } // push rest (null) note
         else { array.push(notes[rand]) } // push random note from mode
@@ -185,6 +185,12 @@ export default {
 </script>
 
 <style lang="sass" scoped>
+  section
+    background: #fff
+    padding: 6px 20px 20px 20px
+    margin-bottom: 10px
+    border-radius: 6px
+    border: solid 1px #ddd
   ul
     list-style-type: none
     padding: 0
@@ -194,7 +200,9 @@ export default {
   a
     color: #42b983
   .block
-    margin-bottom: 20px
+    margin-bottom: 6px
+    &:last-child
+      margin-bottom: 0
   button
     border: solid 1px #999
     border-radius: 3px
