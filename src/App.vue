@@ -19,7 +19,7 @@
         </select>
         <button type="button"
         @click="randomizeGlobalKeyMode()">
-          Random Key/Mode
+          Global Key/Mode
         </button>
       </div>
       <div class="bpm">
