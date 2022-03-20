@@ -7,7 +7,8 @@ export default {
   data(){
     return {
       name: 'Mid',
-      octave: 4
+      octave: 4,
+      phraseLength: 16
     }
   }
 }

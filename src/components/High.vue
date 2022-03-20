@@ -7,7 +7,8 @@ export default {
   data(){
     return {
       name: 'High',
-      octave: 5
+      octave: 5,
+      phraseLength: 32
     }
   },
   methods: {}

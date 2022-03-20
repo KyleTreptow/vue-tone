@@ -8,7 +8,8 @@ export default {
     return {
       name: 'Sub',
       octave: 2,
-      synthWaveForm: 'sine'
+      synthWaveForm: 'sine',
+      phraseLength: 4
     }
   },
   methods: {}

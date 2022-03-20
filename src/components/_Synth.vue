@@ -40,7 +40,10 @@
           @click="startAudio(note)">{{ note }}</button>
       </div>
       <div class="block">
-        <span class="seq-array">{{ seqArray }}</span>
+        <div>
+          <button type="button" @click="displaySeqArr = !displaySeqArr">Display Sequence Notes</button>
+        </div>
+        <span class="seq-array" v-if="displaySeqArr">{{ seqArray }}</span>
       </div>
       <!-- <div class="block">
         <button class="seq-btn" @click="playSequence(modeNotes)">
@@ -85,6 +88,7 @@ export default {
       showOffKeys: true,
       playing: false,
       synthPart: null,
+      displaySeqArr: false,
       seqArray: [],
       liveNote: null,
       synthWaveForm: 'triangle',

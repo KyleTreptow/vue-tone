@@ -137,7 +137,7 @@ export default {
     -moz-osx-font-smoothing: grayscale
     text-align: center
     color: #2c3e50
-    padding: 60px 0
+    padding: 20px 0
   .globals
     margin-bottom: 10px
   .bpm
