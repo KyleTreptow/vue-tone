@@ -16,7 +16,7 @@
           <option v-for="wf in waveForms" :value="wf" :key="wf">{{ wf }}</option>
         </select>
         &nbsp;
-        <span>Prase Length:</span>
+        <span>Phrase Length:</span>
         &nbsp;
         <select v-model="phraseLength">
           <option value="2" key="2">2</option>
