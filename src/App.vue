@@ -2,13 +2,12 @@
   <div id="app" class="app">
     <h1>Music Generator</h1>
     <h2>Tone and Vue.js</h2>
-
+    <!-- Layers (start) -->
     <High :notes="notes" :modes="modes" :scales="scales" ref="high"/>
     <Mid :notes="notes" :modes="modes" :scales="scales" ref="mid"/>
     <Bass :notes="notes" :modes="modes" :scales="scales" ref="bass" />
     <Sub :notes="notes" :modes="modes" :scales="scales" ref="sub" />
-
-
+    <!-- Layers (end) -->
     <div>
       <div class="globals">
         <select v-model="globalKey" @change="changeGlobalKey(globalKey)">
@@ -33,12 +32,6 @@
       </div>
       <button class="play-btn" type="button" @click="play()">Play</button>
     </div>
-
-
-    <!-- <footer>
-      Footer
-    </footer> -->
-
   </div>
 </template>
 
@@ -52,9 +45,7 @@ import Sub from './components/Sub.vue'
 
 export default {
   name: 'App',
-  components: {
-    High, Mid, Bass, Sub
-  },
+  components: { High, Mid, Bass, Sub },
   data(){
     return {
       notes: ['C', 'Db', 'D', 'Eb', 'E', 'F', 'Gb', 'G', 'Ab', 'A', 'Bb', 'B'],
@@ -70,45 +61,51 @@ export default {
       },
       globalKey: "C",
       globalMode: "aeolian",
-      bpm: 120
+      bpm: 120,
+      playing: false
     }
   },
   mounted(){
     Tone.Transport.bpm.value = this.bpm
   },
   computed: {
-    instruments(){
+    layers(){
       let r = this.$refs
       return [r.sub, r.bass, r.mid, r.high]
     }
   },
   methods: {
-    play(){
-      this.$refs.high.playRandomSequence()
-      this.$refs.mid.playRandomSequence()
-      this.$refs.bass.playRandomSequence()
-      this.$refs.sub.playRandomSequence()
-    },
     changeBpm(bpm){
       Tone.Transport.bpm.value = bpm
     },
+    play(){
+      if (Tone.context.state !== 'running') {
+        Tone.context.resume()
+      }
+      for(const layer of this.layers) {
+        let synthPart = layer.createSequence()
+        synthPart.start()
+      }
+      if (!this.playing) {
+        Tone.Transport.start()
+        this.playing = true
+      } else {
+        Tone.Transport.stop()
+        Tone.Transport.cancel()
+        this.playing = false
+      }
+    },
     changeGlobalKey(key){
-      this.$refs.high.activeKey = key
-      this.$refs.mid.activeKey = key
-      this.$refs.bass.activeKey = key
-      this.$refs.sub.activeKey = key
+      for(const layer of this.layers)
+      { layer.activeKey = key }
     },
     changeGlobalMode(mode){
-      this.$refs.high.activeMode = mode
-      this.$refs.mid.activeMode = mode
-      this.$refs.bass.activeMode = mode
-      this.$refs.sub.activeMode = mode
+      for(const layer of this.layers)
+      { layer.activeMode = mode }
     },
     randomizeGlobalKeyMode(){
-      let notesNum = this.notes.length
-      let modesNum = this.modes.length
-      this.globalKey = this.notes[Math.floor(Math.random() * notesNum)]
-      this.globalMode = this.modes[Math.floor(Math.random() * modesNum)]
+      this.globalKey = this.notes[Math.floor(Math.random() * this.notes.length)]
+      this.globalMode = this.modes[Math.floor(Math.random() * this.modes.length)]
       this.changeGlobalKey(this.globalKey)
       this.changeGlobalMode(this.globalMode)
     }
@@ -164,27 +161,4 @@ export default {
     &:active
       background-color: darken(#2c3e50, 8%)
       border-color: darken(#2c3e50, 16%)
-  footer
-    background: #eee
-    padding: 20px
-    position: absolute
-    bottom: 0
-    left: 0
-    width: 100%
-  .foot-link
-    display: inline-block
-    margin-right: 10px
-    color: #2c3e50
-    background-color: transparent
-    border: solid 1px #2c3e50
-    border-radius: 3px
-    padding: 5px 20px
-    &:last-child
-      margin-right: 0
-    &:hover,
-    &:focus,
-    &:active
-      color: #fff
-      background-color: #42b983
-      border: solid 1px darken(#42b983, 10%)
 </style>

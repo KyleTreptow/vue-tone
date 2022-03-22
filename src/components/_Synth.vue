@@ -40,7 +40,6 @@
           :class="{
             active: modeNotes.includes(note),
             inactive: !modeNotes.includes(note),
-            off: !showOffKeys,
             live: note == liveNote
           }"
           @click="startAudio(note)">{{ note }}</button>
@@ -69,9 +68,7 @@ export default {
       activeMode: 'aeolian',
       phraseLength: 32,
       noteLength: "8n",
-      showOffKeys: true,
       playing: false,
-      synthPart: null,
       displaySeqArr: false,
       seqArray: [],
       liveNote: null,
@@ -119,42 +116,29 @@ export default {
     startAudio(note) {
       this.synth.triggerAttackRelease(note, "8n")
     },
-    playSequence(notes){
+    createSequence(){
       let that = this
-      if (Tone.context.state !== 'running') {
-        Tone.context.resume()
-      }
       let s = this.synth
-      this.synthPart = new Tone.Sequence(
+      let notes = this.generatePattern()
+      let synthPart = new Tone.Sequence(
         function(time, note) {
-          s.triggerAttackRelease(note, "10hz", time)
+          s.triggerAttackRelease(note, "10hz", time) // note, release, time
           that.liveNote = note
         },
         notes, this.noteLength
       );
-      this.synthPart.start()
-      if (!this.playing) {
-        Tone.Transport.start()
-        this.playing = true
-      } else {
-        Tone.Transport.stop()
-        Tone.Transport.cancel()
-        this.playing = false
-        this.liveNote = null
-      }
+      return synthPart
     },
-    playRandomSequence(){
+    generatePattern(){
       let notes = [...this.modeNotes]
-      let array = []
-      let pl = this.phraseLength
-      for (let i = 0; i < pl; i++) { // phraseLength: 2, 4, 8, 16, 32, 64 etc.
+      let seq = []
+      for (let i = 0; i < this.phraseLength; i++) { // phraseLength: 2, 4, 8, 16, 32, 64 etc.
         let rand = Math.floor(Math.random() * 9)
-        if(rand == 9){ array.push(null) } // push rest (null) note
-        else { array.push(notes[rand]) } // push random note from mode
+        if(rand == 9){ seq.push(null) } // push rest (null) note
+        else { seq.push(notes[rand]) } // push random note from mode
       }
-      let seq = array
-      this.seqArray = seq
-      this.playSequence(seq, this.noteLength)
+      this.seqArray = seq // sets display-able array
+      return seq
     }
   },
   watch: {
@@ -219,8 +203,6 @@ export default {
       &:active
         background-color: #2c3e50
         border-color: darken(#2c3e50, 5%)
-    &.inactive.off
-      display: none
   .seq-btn
     background-color: #2c3e50
     border: solid 1px darken(#2c3e50, 5%)
