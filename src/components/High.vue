@@ -1,5 +1,4 @@
 <script>
-// import * as Tone from 'tone'
 import Synth from './_Synth.vue'
 export default {
   name: 'High',
@@ -11,7 +10,6 @@ export default {
       phraseLength: 32,
       noteLength: "8n"
     }
-  },
-  methods: {}
+  }
 }
 </script>

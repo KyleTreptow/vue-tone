@@ -24,10 +24,8 @@
       <div class="bpm">
         <b>BPM: {{ bpm }}</b>
         <div>
-          <input type="range"
-           min="70" max="200"
-           v-model="bpm"
-           @change="changeBpm(bpm)" >
+          <input type="range" min="70" max="200"
+           v-model="bpm" @change="changeBpm(bpm)" >
         </div>
       </div>
       <button class="play-btn" type="button" @click="play()">Play</button>

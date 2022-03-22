@@ -34,11 +34,9 @@
         </select>
       </div>
       <div>
-        Volume:
-        <input type="range"
-         min="-24" max="0"
-         v-model="volume"
-         @change="changeVolume(volume)" >
+        <span>Vol:</span>
+        <input type="range" min="-24" max="0"
+         v-model="volume" @change="synth.volume.value = volume" >
          {{ volume }} DB
       </div>
       <div class="block">
@@ -148,9 +146,6 @@ export default {
       }
       this.seqArray = seq // sets display-able array
       return seq
-    },
-    changeVolume(vol){
-      this.synth.volume.value = vol
     }
   },
   watch: {
