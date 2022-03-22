@@ -91,10 +91,11 @@ export default {
   },
   mounted() {
     // Init Synths & Effects
-    this.effects.fbDelay = new Tone.FeedbackDelay("8n", 0.35).toDestination();
-    this.synth = new Tone.Synth().connect(this.effects.fbDelay);
-    // this.synth = new Tone.Synth().toDestination()
-    console.log(this.synth.volume.value)
+    this.effects.fbDelay = new Tone.FeedbackDelay("8n", 0.35)
+    this.effects.reverb = new Tone.Reverb(1.5, 0.01)
+    this.synth = new Tone.Synth()
+    // Route
+    this.route()
   },
   computed: {
     notesFromKey(){
@@ -120,6 +121,18 @@ export default {
     }
   },
   methods: {
+    route(){
+      // this.effects.fbDelay.disconnect()
+      // this.synth.disconnect()
+
+      // this.synth.connect(this.effects.reverb)
+      // this.effects.reverb.toDestination()
+
+      this.synth.connect(this.effects.fbDelay)
+      this.effects.fbDelay.toDestination()
+
+      // this.synth.toDestination()
+    },
     startAudio(note) {
       this.synth.triggerAttackRelease(note, "8n")
     },
@@ -129,7 +142,7 @@ export default {
       let notes = this.generatePattern()
       let synthPart = new Tone.Sequence(
         function(time, note) {
-          s.triggerAttackRelease(note, "10hz", time) // note, release, time
+          s.triggerAttackRelease(note, "10hz", time) // note, release (10hz or 16n?), time
           that.liveNote = note
         },
         notes, this.noteLength
