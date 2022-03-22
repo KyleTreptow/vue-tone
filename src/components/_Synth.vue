@@ -68,7 +68,6 @@ export default {
       activeMode: 'aeolian',
       phraseLength: 32,
       noteLength: "8n",
-      playing: false,
       displaySeqArr: false,
       seqArray: [],
       liveNote: null,
@@ -116,7 +115,7 @@ export default {
     startAudio(note) {
       this.synth.triggerAttackRelease(note, "8n")
     },
-    createSequence(){
+    createSequence(){ // creates a Tone sequence from pattern of notes
       let that = this
       let s = this.synth
       let notes = this.generatePattern()
@@ -129,7 +128,7 @@ export default {
       );
       return synthPart
     },
-    generatePattern(){
+    generatePattern(){ // generates pattern of notes from mode
       let notes = [...this.modeNotes]
       let seq = []
       for (let i = 0; i < this.phraseLength; i++) { // phraseLength: 2, 4, 8, 16, 32, 64 etc.

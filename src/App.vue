@@ -96,12 +96,14 @@ export default {
       }
     },
     changeGlobalKey(key){
-      for(const layer of this.layers)
-      { layer.activeKey = key }
+      for(const layer of this.layers) {
+        layer.activeKey = key
+      }
     },
     changeGlobalMode(mode){
-      for(const layer of this.layers)
-      { layer.activeMode = mode }
+      for(const layer of this.layers) {
+        layer.activeMode = mode
+      }
     },
     randomizeGlobalKeyMode(){
       this.globalKey = this.notes[Math.floor(Math.random() * this.notes.length)]
