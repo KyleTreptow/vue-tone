@@ -29,8 +29,11 @@
           <option value="1n" key="1n">1n</option>
           <option value="2n" key="2n">2n</option>
           <option value="4n" key="4n">4n</option>
+          <option value="4t" key="4t">4t</option>
           <option value="8n" key="8n">8n</option>
+          <option value="8t" key="8t">8t</option>
           <option value="16n" key="16n">16n</option>
+          <option value="16t" key="16t">16t</option>
         </select>
       </div>
       <div>
@@ -91,8 +94,8 @@ export default {
   },
   mounted() {
     // Init Synths & Effects
-    this.effects.fbDelay = new Tone.FeedbackDelay("8n", 0.35)
-    this.effects.reverb = new Tone.Reverb(1.5, 0.01)
+    this.effects.fbDelay = new Tone.FeedbackDelay({ "wet": 1, "delayTime": "8n", "feedback": 0.35 })
+    this.effects.reverb = new Tone.Reverb({ "wet": 0.4, "decay": 1.5, "preDelay": 0.01 })
     this.synth = new Tone.Synth()
     // Route
     this.route()
@@ -122,15 +125,25 @@ export default {
   },
   methods: {
     route(){
+      // == DISCONNECTS
       // this.effects.fbDelay.disconnect()
+      // this.effects.reverb.disconnect()
       // this.synth.disconnect()
 
+      // == REVERB ONLY
       // this.synth.connect(this.effects.reverb)
       // this.effects.reverb.toDestination()
 
+      // == DELAY ONLY
       this.synth.connect(this.effects.fbDelay)
       this.effects.fbDelay.toDestination()
 
+      // == DELAY && REVERB
+      // this.synth.connect(this.effects.fbDelay)
+      // this.effects.fbDelay.connect(this.effects.reverb)
+      // this.effects.reverb.toDestination()
+
+      // == SYNTH DIRECT OUT CLEAN
       // this.synth.toDestination()
     },
     startAudio(note) {
