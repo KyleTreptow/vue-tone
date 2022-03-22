@@ -15,9 +15,7 @@
         <select v-model="synthWaveForm">
           <option v-for="wf in waveForms" :value="wf" :key="wf">{{ wf }}</option>
         </select>
-        &nbsp;
-        <span>Phrase Length:</span>
-        &nbsp;
+        &nbsp; <span>Phrase Length:</span> &nbsp;
         <select v-model="phraseLength">
           <option value="2" key="2">2</option>
           <option value="4" key="4">4</option>
@@ -26,9 +24,7 @@
           <option value="32" key="32">32</option>
           <option value="64" key="64">64</option>
         </select>
-        &nbsp;
-        <span>Note Length:</span>
-        &nbsp;
+        &nbsp; <span>Note Length:</span> &nbsp;
         <select v-model="noteLength">
           <option value="1n" key="1n">1n</option>
           <option value="2n" key="2n">2n</option>
@@ -55,29 +51,6 @@
         </div>
         <span class="seq-array" v-if="displaySeqArr">{{ seqArray }}</span>
       </div>
-      <!-- <div class="block">
-        <button class="seq-btn" @click="playSequence(modeNotes)">
-          Play Scale
-        </button>
-        <button class="seq-btn" @click="playSequence(suffleNotes())">
-          Play Shuffle
-        </button>
-        <button class="seq-btn" @click="playRandomSequence()">
-          Play Random
-        </button>
-      </div>
-
-    <div>
-      <button class="foot-link" @click="showOffKeys = !showOffKeys">
-        {{ showOffKeys ? 'Hide' : 'Show' }} Off Keys
-      </button>
-      <button class="foot-link" @click="log(synth)">
-        Log Synth
-      </button>
-      <button class="foot-link" @click="randomize()">
-        Randomize
-      </button>
-    </div> -->
   </section>
   </div>
 </template>
@@ -143,33 +116,21 @@ export default {
     }
   },
   methods: {
-    log(data){
-      console.log(data)
-    },
     startAudio(note) {
       this.synth.triggerAttackRelease(note, "8n")
     },
-    randomize(){
-      let octaveNum = 5
-      let notesNum = this.notes.length
-      let modesNum = this.modes.length
-      this.octave = Math.floor(Math.random() * octaveNum) + 1
-      this.activeKey = this.notes[Math.floor(Math.random() * notesNum)]
-      this.activeMode = this.modes[Math.floor(Math.random() * modesNum)]
-    },
-    playSequence(notes, d = this.noteLength){
+    playSequence(notes){
       let that = this
       if (Tone.context.state !== 'running') {
         Tone.context.resume()
       }
       let s = this.synth
-      let n = notes
       this.synthPart = new Tone.Sequence(
         function(time, note) {
           s.triggerAttackRelease(note, "10hz", time)
           that.liveNote = note
         },
-        n, d
+        notes, this.noteLength
       );
       this.synthPart.start()
       if (!this.playing) {
@@ -182,22 +143,7 @@ export default {
         this.liveNote = null
       }
     },
-    playRandomSequence(d = this.noteLength){
-      let seq = this.randomNotes()
-      this.seqArray = seq
-      this.playSequence(seq, d)
-    },
-    suffleNotes(){
-      let array = [...this.modeNotes]
-      for (let i = array.length - 1; i > 0; i--) {
-        let j = Math.floor(Math.random() * (i + 1));
-        let temp = array[i];
-        array[i] = array[j];
-        array[j] = temp;
-      }
-      return array
-    },
-    randomNotes(){
+    playRandomSequence(){
       let notes = [...this.modeNotes]
       let array = []
       let pl = this.phraseLength
@@ -206,7 +152,9 @@ export default {
         if(rand == 9){ array.push(null) } // push rest (null) note
         else { array.push(notes[rand]) } // push random note from mode
       }
-      return array
+      let seq = array
+      this.seqArray = seq
+      this.playSequence(seq, this.noteLength)
     }
   },
   watch: {

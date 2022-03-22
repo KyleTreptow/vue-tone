@@ -4,7 +4,7 @@
     <h2>Tone and Vue.js</h2>
 
     <High :notes="notes" :modes="modes" :scales="scales" ref="high"/>
-    <Melody :notes="notes" :modes="modes" :scales="scales" ref="melody"/>
+    <Mid :notes="notes" :modes="modes" :scales="scales" ref="mid"/>
     <Bass :notes="notes" :modes="modes" :scales="scales" ref="bass" />
     <Sub :notes="notes" :modes="modes" :scales="scales" ref="sub" />
 
@@ -46,14 +46,14 @@
 
 import * as Tone from 'tone'
 import High from './components/High.vue'
-import Melody from './components/Melody.vue'
+import Mid from './components/Mid.vue'
 import Bass from './components/Bass.vue'
 import Sub from './components/Sub.vue'
 
 export default {
   name: 'App',
   components: {
-    High, Melody, Bass, Sub
+    High, Mid, Bass, Sub
   },
   data(){
     return {
@@ -76,10 +76,16 @@ export default {
   mounted(){
     Tone.Transport.bpm.value = this.bpm
   },
+  computed: {
+    instruments(){
+      let r = this.$refs
+      return [r.sub, r.bass, r.mid, r.high]
+    }
+  },
   methods: {
     play(){
       this.$refs.high.playRandomSequence()
-      this.$refs.melody.playRandomSequence()
+      this.$refs.mid.playRandomSequence()
       this.$refs.bass.playRandomSequence()
       this.$refs.sub.playRandomSequence()
     },
@@ -88,13 +94,13 @@ export default {
     },
     changeGlobalKey(key){
       this.$refs.high.activeKey = key
-      this.$refs.melody.activeKey = key
+      this.$refs.mid.activeKey = key
       this.$refs.bass.activeKey = key
       this.$refs.sub.activeKey = key
     },
     changeGlobalMode(mode){
       this.$refs.high.activeMode = mode
-      this.$refs.melody.activeMode = mode
+      this.$refs.mid.activeMode = mode
       this.$refs.bass.activeMode = mode
       this.$refs.sub.activeMode = mode
     },
