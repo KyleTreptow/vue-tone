@@ -33,6 +33,14 @@
           <option value="16n" key="16n">16n</option>
         </select>
       </div>
+      <div>
+        Volume:
+        <input type="range"
+         min="-24" max="0"
+         v-model="volume"
+         @change="changeVolume(volume)" >
+         {{ volume }} DB
+      </div>
       <div class="block">
         <button v-for="note in notesFromKey"
           :key="'note-'+note"
@@ -79,7 +87,8 @@ export default {
         chorus: null,
         distortion: null,
         phaser: null
-      }
+      },
+      volume: 0
     }
   },
   mounted() {
@@ -87,6 +96,7 @@ export default {
     this.effects.fbDelay = new Tone.FeedbackDelay("8n", 0.35).toDestination();
     this.synth = new Tone.Synth().connect(this.effects.fbDelay);
     // this.synth = new Tone.Synth().toDestination()
+    console.log(this.synth.volume.value)
   },
   computed: {
     notesFromKey(){
@@ -138,6 +148,9 @@ export default {
       }
       this.seqArray = seq // sets display-able array
       return seq
+    },
+    changeVolume(vol){
+      this.synth.volume.value = vol
     }
   },
   watch: {
