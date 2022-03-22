@@ -26,6 +26,16 @@
           <option value="32" key="32">32</option>
           <option value="64" key="64">64</option>
         </select>
+        &nbsp;
+        <span>Note Length:</span>
+        &nbsp;
+        <select v-model="noteLength">
+          <option value="1n" key="1n">1n</option>
+          <option value="2n" key="2n">2n</option>
+          <option value="4n" key="4n">4n</option>
+          <option value="8n" key="8n">8n</option>
+          <option value="16n" key="16n">16n</option>
+        </select>
       </div>
       <div class="block">
         <button v-for="note in notesFromKey"
@@ -85,6 +95,7 @@ export default {
       octave: 4,
       activeMode: 'aeolian',
       phraseLength: 32,
+      noteLength: "8n",
       showOffKeys: true,
       playing: false,
       synthPart: null,
@@ -146,7 +157,7 @@ export default {
       this.activeKey = this.notes[Math.floor(Math.random() * notesNum)]
       this.activeMode = this.modes[Math.floor(Math.random() * modesNum)]
     },
-    playSequence(notes, d = "8n"){
+    playSequence(notes, d = this.noteLength){
       let that = this
       if (Tone.context.state !== 'running') {
         Tone.context.resume()
@@ -171,8 +182,7 @@ export default {
         this.liveNote = null
       }
     },
-    playRandomSequence(duration){
-      let d = duration || "8n"
+    playRandomSequence(d = this.noteLength){
       let seq = this.randomNotes()
       this.seqArray = seq
       this.playSequence(seq, d)
@@ -256,6 +266,9 @@ export default {
       background-color: #42b983
       color: #fff
       &.live
+        background-color: #2c3e50
+        border-color: darken(#2c3e50, 5%)
+      &:active
         background-color: #2c3e50
         border-color: darken(#2c3e50, 5%)
     &.inactive.off

@@ -78,10 +78,10 @@ export default {
   },
   methods: {
     play(){
-      this.$refs.high.playRandomSequence("8n")
-      this.$refs.melody.playRandomSequence("4n")
-      this.$refs.bass.playRandomSequence("2n")
-      this.$refs.sub.playRandomSequence("1n")
+      this.$refs.high.playRandomSequence()
+      this.$refs.melody.playRandomSequence()
+      this.$refs.bass.playRandomSequence()
+      this.$refs.sub.playRandomSequence()
     },
     changeBpm(bpm){
       Tone.Transport.bpm.value = bpm

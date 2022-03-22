@@ -8,7 +8,8 @@ export default {
     return {
       name: 'High',
       octave: 5,
-      phraseLength: 32
+      phraseLength: 32,
+      noteLength: "8n"
     }
   },
   methods: {}
