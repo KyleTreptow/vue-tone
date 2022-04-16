@@ -81,7 +81,7 @@ export default {
       seqArray: [],
       liveNote: null,
       synthWaveForm: 'triangle',
-      waveForms: ['sine', 'triangle', 'square', 'sawtooth'],
+      waveForms: ['sine', 'triangle', 'amtriangle', 'square', 'sawtooth'],
       effects: {
         fbDelay: null,
         reverb: null,
