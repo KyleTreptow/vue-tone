@@ -89,14 +89,14 @@ export default {
         distortion: null,
         phaser: null
       },
-      volume: 0
+      volume: -12
     }
   },
   mounted() {
     // Init Synths & Effects
     this.effects.fbDelay = new Tone.FeedbackDelay({ "wet": 1, "delayTime": "8n", "feedback": 0.35 })
     this.effects.reverb = new Tone.Reverb({ "wet": 0.4, "decay": 1.5, "preDelay": 0.01 })
-    this.synth = new Tone.Synth()
+    this.synth = new Tone.Synth({ volume: this.volume })
     // Route
     this.route()
   },

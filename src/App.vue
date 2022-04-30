@@ -8,6 +8,11 @@
     <Bass :notes="notes" :modes="modes" :scales="scales" ref="bass" />
     <Sub :notes="notes" :modes="modes" :scales="scales" ref="sub" />
     <!-- Layers (end) -->
+
+    <Kick ref="kick" />
+    <Snare ref="snare" />
+    <Hat ref="hat" />
+
     <div>
       <div class="globals">
         <select v-model="globalKey" @change="changeGlobalKey(globalKey)">
@@ -41,9 +46,13 @@ import Mid from './components/Mid.vue'
 import Bass from './components/Bass.vue'
 import Sub from './components/Sub.vue'
 
+import Kick from './components/Kick.vue'
+import Snare from './components/Snare.vue'
+import Hat from './components/Hat.vue'
+
 export default {
   name: 'App',
-  components: { High, Mid, Bass, Sub },
+  components: { High, Mid, Bass, Sub, Kick, Snare, Hat },
   data(){
     return {
       notes: ['C', 'Db', 'D', 'Eb', 'E', 'F', 'Gb', 'G', 'Ab', 'A', 'Bb', 'B'],
@@ -69,7 +78,7 @@ export default {
   computed: {
     layers(){
       let r = this.$refs
-      return [r.sub, r.bass, r.mid, r.high]
+      return [r.sub, r.bass, r.mid, r.high, r.kick, r.snare, r.hat]
     }
   },
   methods: {
