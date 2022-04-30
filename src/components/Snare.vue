@@ -24,9 +24,9 @@ export default {
 			},
 			envelope: {
 				attack: 0.001,
-				decay: 0.13,
+				decay: 0.18,
 				sustain: 0,
-				release: 0.03
+				release: 0.25
 			}
     }).toDestination()
   },
