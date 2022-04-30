@@ -8,7 +8,8 @@ export default {
       name: 'Sub',
       octave: 2,
       phraseLength: 4,
-      noteLength: "1n"
+      noteLength: "1n",
+      volume: 0
     }
   }
 }

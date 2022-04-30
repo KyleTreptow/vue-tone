@@ -8,7 +8,8 @@ export default {
       name: 'Bass',
       octave: 3,
       phraseLength: 8,
-      noteLength: "2n"
+      noteLength: "2n",
+      volume: 0
     }
   }
 }

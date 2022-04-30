@@ -89,7 +89,7 @@ export default {
         distortion: null,
         phaser: null
       },
-      volume: -12
+      volume: -8
     }
   },
   mounted() {
