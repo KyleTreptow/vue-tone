@@ -29,7 +29,7 @@ export default {
         function(time, note) {
           d.triggerAttackRelease(note, "10hz", time) // note, release (10hz or 16n?), time
         },
-        ["C2", "C2", null, null], "4n"
+        ["C2", "C2", null, "C2", null, null, null, "C2"], "8n"
       );
       return synthPart
     }
