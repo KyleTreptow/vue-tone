@@ -1,33 +1,31 @@
-<template lang="html">
-  <div class="">
-    <section>
-      <button @click="startAudio()">Play Snare</button>
-    </section>
-  </div>
-</template>
-
 <script>
 import * as Tone from 'tone'
+import Drum from './_Drum.vue'
 export default {
   name: 'Snare',
+  extends: Drum,
   data(){
     return {
-      drum: null
+      noteLength: "4n",
+      drumPattern: [
+        null, null, "C2", null, null, null, "C2", null,
+        null, null, "C2", "C2", null, null, "C2", null
+      ]
     }
   },
   mounted() {
     this.drum = new Tone.NoiseSynth({
-      volume: 12,
-			noise: {
-				type: 'pink',
-				playbackRate: 3
-			},
-			envelope: {
-				attack: 0.001,
-				decay: 0.18,
-				sustain: 0,
-				release: 0.25
-			}
+      volume: 14,
+      noise: {
+        type: 'pink',
+        playbackRate: 3
+      },
+      envelope: {
+        attack: 0.001,
+        decay: 0.18,
+        sustain: 0,
+        release: 0.05
+      }
     }).toDestination()
   },
   methods: {
@@ -35,25 +33,18 @@ export default {
       this.drum.triggerAttackRelease("4n")
     },
     createSequence(){ // creates a Tone sequence from pattern of notes
-      // let that = this
+      let that = this
       let d = this.drum
       let synthPart = new Tone.Sequence(
         function(time) {
           d.triggerAttackRelease("10hz", time) // note, release (10hz or 16n?), time
+          // drum index
+          that.playingIndex++
         },
-        [null, null, "C2", null], "4n"
+        this.drumPattern, this.noteLength
       );
       return synthPart
     }
   }
 }
 </script>
-
-<style lang="sass" scoped>
-  section
-    background: #fff
-    padding: 6px 20px 6px 20px
-    margin-bottom: 10px
-    border-radius: 6px
-    border: solid 1px #ddd
-</style>

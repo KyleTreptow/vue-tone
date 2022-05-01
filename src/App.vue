@@ -6,7 +6,7 @@
     <High :notes="notes" :modes="modes" :scales="scales" ref="high"/>
     <Mid :notes="notes" :modes="modes" :scales="scales" ref="mid"/>
     <Bass :notes="notes" :modes="modes" :scales="scales" ref="bass" />
-    <Sub :notes="notes" :modes="modes" :scales="scales" ref="sub" />
+    <Sub v-if="false" :notes="notes" :modes="modes" :scales="scales" ref="sub" />
     <!-- Layers (end) -->
 
     <Kick ref="kick" />
@@ -78,7 +78,8 @@ export default {
   computed: {
     layers(){
       let r = this.$refs
-      return [r.sub, r.bass, r.mid, r.high, r.kick, r.snare, r.hat]
+      // return [r.sub, r.bass, r.mid, r.high, r.kick, r.snare, r.hat]
+      return [r.bass, r.mid, r.high, r.kick, r.snare, r.hat]
     }
   },
   methods: {

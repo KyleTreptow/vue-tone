@@ -3,15 +3,15 @@
     <section>
       <div class="block">
         <span><b>{{ name }}: &nbsp; </b></span>
-        <select v-model="activeKey">
+        <!-- <select v-model="activeKey">
           <option v-for="note in notes" :value="note" :key="note">{{ note }}</option>
-        </select>
+        </select> -->
         <select v-model="octave">
           <option v-for="n in 5" :value="n" :key="n">{{ n }}</option>
         </select>
-        <select v-model="activeMode">
+        <!-- <select v-model="activeMode">
           <option v-for="mode in modes" :value="mode" :key="mode">{{ mode }}</option>
-        </select>
+        </select> -->
         <select v-model="synthWaveForm">
           <option v-for="wf in waveForms" :value="wf" :key="wf">{{ wf }}</option>
         </select>
@@ -38,7 +38,7 @@
       </div>
       <div>
         <span>Vol:</span>
-        <input type="range" min="-24" max="0"
+        <input type="range" min="-24" max="12"
          v-model="volume" @change="synth.volume.value = volume" >
          {{ volume }} DB
       </div>
@@ -53,7 +53,7 @@
           }"
           @click="startAudio(note)">{{ note }}</button>
       </div>
-      <div class="block">
+      <div class="block" v-if="false">
         <div>
           <button type="button" @click="displaySeqArr = !displaySeqArr">Display Sequence Notes</button>
         </div>
@@ -223,7 +223,7 @@ export default {
         border-color: darken(#42b983, 15%)
   .note-item
     display: inline-block
-    padding: 20px 10px
+    padding: 10px 5px
     font-weight: 600
     border: solid 1px #ddd
     color: #999
