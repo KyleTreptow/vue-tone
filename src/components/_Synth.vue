@@ -3,15 +3,9 @@
     <section>
       <div class="block">
         <span><b>{{ name }}: &nbsp; </b></span>
-        <!-- <select v-model="activeKey">
-          <option v-for="note in notes" :value="note" :key="note">{{ note }}</option>
-        </select> -->
         <select v-model="octave">
           <option v-for="n in 5" :value="n" :key="n">{{ n }}</option>
         </select>
-        <!-- <select v-model="activeMode">
-          <option v-for="mode in modes" :value="mode" :key="mode">{{ mode }}</option>
-        </select> -->
         <select v-model="synthWaveForm">
           <option v-for="wf in waveForms" :value="wf" :key="wf">{{ wf }}</option>
         </select>

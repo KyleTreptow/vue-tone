@@ -2,16 +2,16 @@
   <div id="app" class="app">
     <h1>Music Generator</h1>
     <h2>Tone and Vue.js</h2>
+
     <!-- Layers (start) -->
     <High :notes="notes" :modes="modes" :scales="scales" ref="high"/>
     <Mid :notes="notes" :modes="modes" :scales="scales" ref="mid"/>
     <Bass :notes="notes" :modes="modes" :scales="scales" ref="bass" />
-    <Sub v-if="false" :notes="notes" :modes="modes" :scales="scales" ref="sub" />
-    <!-- Layers (end) -->
-
     <Kick ref="kick" />
     <Snare ref="snare" />
     <Hat ref="hat" />
+    <!-- Layers (end) -->
+
 
     <div>
       <div class="globals">
@@ -44,15 +44,13 @@ import * as Tone from 'tone'
 import High from './components/High.vue'
 import Mid from './components/Mid.vue'
 import Bass from './components/Bass.vue'
-import Sub from './components/Sub.vue'
-
 import Kick from './components/Kick.vue'
 import Snare from './components/Snare.vue'
 import Hat from './components/Hat.vue'
 
 export default {
   name: 'App',
-  components: { High, Mid, Bass, Sub, Kick, Snare, Hat },
+  components: { High, Mid, Bass, Kick, Snare, Hat },
   data(){
     return {
       notes: ['C', 'Db', 'D', 'Eb', 'E', 'F', 'Gb', 'G', 'Ab', 'A', 'Bb', 'B'],
@@ -73,15 +71,15 @@ export default {
     }
   },
   mounted(){
+    // Global BPM
     Tone.Transport.bpm.value = this.bpm
     // Start Random Key/Mode
     this.randomizeGlobalKeyMode()
   },
   computed: {
     layers(){
-      let r = this.$refs
-      // return [r.sub, r.bass, r.mid, r.high, r.kick, r.snare, r.hat]
-      return [r.bass, r.mid, r.high, r.kick, r.snare, r.hat]
+      // Get instrument layers by grabbing keys of the refs obj 
+      return Object.keys(this.$refs).map(x => this.$refs[x])
     }
   },
   methods: {
