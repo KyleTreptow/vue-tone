@@ -6,10 +6,11 @@ export default {
   data(){
     return {
       name: 'Bass',
-      octave: 3,
+      octave: 2,
       phraseLength: 8,
       noteLength: "2n",
-      volume: 0
+      volume: 8,
+      synthWaveForm: 'sine'
     }
   }
 }

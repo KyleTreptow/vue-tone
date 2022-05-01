@@ -6,10 +6,11 @@ export default {
   data(){
     return {
       name: 'Mid',
-      octave: 4,
+      octave: 3,
       phraseLength: 16,
       noteLength: "16n",
-      volume: -10
+      volume: -2,
+      synthWaveForm: 'triangle'
     }
   }
 }

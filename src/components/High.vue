@@ -6,9 +6,11 @@ export default {
   data(){
     return {
       name: 'High',
-      octave: 5,
+      octave: 4,
       phraseLength: 32,
-      noteLength: "8n"
+      noteLength: "8n",
+      volume: 0,
+      synthWaveForm: 'triangle'
     }
   }
 }
