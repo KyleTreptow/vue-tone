@@ -4,12 +4,12 @@
     <h2>Tone and Vue.js</h2>
 
     <!-- Layers (start) -->
-    <High :notes="notes" :modes="modes" :scales="scales" ref="high"/>
-    <Mid :notes="notes" :modes="modes" :scales="scales" ref="mid"/>
-    <Bass :notes="notes" :modes="modes" :scales="scales" ref="bass" />
-    <Kick ref="kick" />
-    <Snare ref="snare" />
-    <Hat ref="hat" />
+    <High   v-if="false" :notes="notes" :modes="modes" :scales="scales" ref="high"/>
+    <Mid    v-if="true"  :notes="notes" :modes="modes" :scales="scales" ref="mid"/>
+    <Bass   v-if="false"  :notes="notes" :modes="modes" :scales="scales" ref="bass" />
+    <Kick   v-if="false"  ref="kick" />
+    <Snare  v-if="false"  ref="snare" />
+    <Hat    v-if="false"  ref="hat" />
     <!-- Layers (end) -->
 
 
@@ -78,7 +78,7 @@ export default {
   },
   computed: {
     layers(){
-      // Get instrument layers by grabbing keys of the refs obj 
+      // Get instrument layers by grabbing keys of the refs obj
       return Object.keys(this.$refs).map(x => this.$refs[x])
     }
   },

@@ -10,7 +10,7 @@ export default {
       phraseLength: 8,
       noteLength: "2n",
       volume: 8,
-      synthWaveForm: 'sine'
+      synthWaveForm: 'square'
     }
   }
 }

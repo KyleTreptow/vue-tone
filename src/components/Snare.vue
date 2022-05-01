@@ -9,7 +9,7 @@ export default {
       noteLength: "4n",
       drumPattern: [
         null, null, "C2", null, null, null, "C2", null,
-        null, null, "C2", "C2", null, null, "C2", null
+        null, null, "C2", null, null, null, "C2", null
       ]
     }
   },
