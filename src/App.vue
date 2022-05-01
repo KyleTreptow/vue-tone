@@ -74,6 +74,8 @@ export default {
   },
   mounted(){
     Tone.Transport.bpm.value = this.bpm
+    // Start Random Key/Mode
+    this.randomizeGlobalKeyMode()
   },
   computed: {
     layers(){

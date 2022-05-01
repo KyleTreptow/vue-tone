@@ -7,7 +7,7 @@ export default {
     return {
       name: 'Mid',
       octave: 4,
-      phraseLength: 8,
+      phraseLength: 16,
       noteLength: "16n",
       volume: -10
     }
