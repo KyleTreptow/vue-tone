@@ -6,9 +6,6 @@
         <select v-model="octave">
           <option v-for="n in 5" :value="n" :key="n">{{ n }}</option>
         </select>
-        <select v-model="synthWaveForm">
-          <option v-for="wf in waveForms" :value="wf" :key="wf">{{ wf }}</option>
-        </select>
         &nbsp; <span>Phrase Length:</span> &nbsp;
         <select v-model="phraseLength">
           <option value="2" key="2">2</option>
@@ -30,12 +27,6 @@
           <option value="16t" key="16t">16t</option>
         </select>
       </div>
-      <div>
-        <span>Vol:</span>
-        <input type="range" min="-24" max="12"
-         v-model="volume" @change="synth.volume.value = volume" >
-         {{ volume }} DB
-      </div>
       <div class="block">
         <button v-for="note in notesFromKey"
           :key="'note-'+note"
@@ -47,12 +38,92 @@
           }"
           @click="startAudio(note)">{{ note }}</button>
       </div>
-      <div class="block" v-if="false">
-        <div>
-          <button type="button" @click="displaySeqArr = !displaySeqArr">Display Sequence Notes</button>
-        </div>
-        <span class="seq-array" v-if="displaySeqArr">{{ seqArray }}</span>
+
+      <button type="button" @click="paramsActive = !paramsActive">Synth Parameters</button>
+      <div class="params" v-if="paramsActive">
+        <main>
+          <div class="osc">
+            <h4>Oscillator</h4>
+            <div>
+              <span>Vol:</span>
+              <input type="range" min="-24" max="12"
+               v-model="params.volume">
+               {{ params.volume }} DB
+            </div>
+            <div>
+              <span>Portamento:</span>
+              <input type="range" min="0.00" max="0.10" step="0.01"
+               v-model="params.portamento">
+               {{ params.portamento }}
+            </div>
+            <div>
+              <select v-model="params.oscillator.type">
+                <option v-for="wf in waveForms" :value="wf" :key="wf">{{ wf }}</option>
+              </select>
+            </div>
+            <div>
+              <span>Phase:</span>
+              <input type="range" min="0" max="360"
+               v-model="params.oscillator.phase">
+               {{ params.oscillator.phase }} deg
+            </div>
+          </div>
+          <div class="env">
+            <h4>Envelope</h4>
+            <div class="">
+              <span>A:</span>
+              <input type="range" min="0.01" max="2.00" step="0.01"
+               v-model="params.envelope.attack">
+               {{ params.envelope.attack }}
+            </div>
+            <div class="">
+              <span>D:</span>
+              <input type="range" min="0.01" max="2.00" step="0.01"
+               v-model="params.envelope.decay">
+               {{ params.envelope.decay }}
+            </div>
+            <div class="">
+              <span>S:</span>
+              <input type="range" min="0" max="1" step="0.01"
+               v-model="params.envelope.sustain">
+               {{ params.envelope.sustain }}
+            </div>
+            <div class="">
+              <span>R:</span>
+              <input type="range" min="0.01" max="2.00" step="0.01"
+               v-model="params.envelope.release">
+               {{ params.envelope.release }}
+            </div>
+          </div>
+        </main>
+        <footer>
+          <div class="effectlist">
+            <div class="inactive">
+              <button v-for="e in inactiveEffects" :key="'effect_'+e"
+              type="button"
+              @click="activateEffect(e)">
+                {{ e }}
+              </button>
+            </div>
+            <div class="active">
+              <button v-for="e in activeEffects" :key="'active_effect_'+e"
+              type="button"
+              @click="deactivateEffect(e)">
+                {{ e }}
+              </button>
+            </div>
+          </div>
+          <!-- <div class="">
+            <button type="button" @click="disconnect()">Disconnect</button>
+            <button type="button" @click="connect()">Connect</button>
+          </div> -->
+          <br>
+          <button type="button" @click="log(synth)">Log Synth</button>
+        </footer>
       </div>
+
+
+
   </section>
   </div>
 </template>
@@ -74,26 +145,54 @@ export default {
       displaySeqArr: false,
       seqArray: [],
       liveNote: null,
-      synthWaveForm: 'triangle',
-      waveForms: ['sine', 'triangle', 'amtriangle', 'square', 'sawtooth'],
+      waveForms: ['sine', 'triangle', 'square', 'sawtooth'],
+      // synth parameters
+      paramsActive: true,
+      params: {
+        "volume": 0,
+        "detune": 0,
+        "portamento": 0.0,
+          "envelope": {
+            "attack": 0.05,
+            "attackCurve": "exponential",
+            "decay": 0.2,
+            "decayCurve": "exponential",
+            "release": 1.5,
+            "releaseCurve": "exponential",
+            "sustain": 0.2
+          },
+          "oscillator": {
+            "phase": 0,
+            "type": 'square'
+          }
+      },
+      // effects units
       effects: {
         fbDelay: null,
         reverb: null,
         chorus: null,
         distortion: null,
-        phaser: null
+        phaser: null,
+        bitcrusher: null,
+        filter: null
       },
-      volume: -8
+      effectsList: ['fbDelay', 'reverb', 'chorus', 'distortion', 'phaser', 'bitcrusher', 'filter'],
+      activeEffects: []
     }
   },
   mounted() {
-    // Init Synths & Effects
+    // Init Synth
+    this.synth = new Tone.Synth(this.params)
+    // Init Effects
     this.effects.fbDelay = new Tone.FeedbackDelay({ "wet": 1, "delayTime": "8n", "feedback": 0.35 })
     this.effects.reverb = new Tone.Reverb({ "wet": 0.4, "decay": 1.5, "preDelay": 0.01 })
-    this.synth = new Tone.Synth({ volume: this.volume })
-    this.synth.oscillator.type = this.synthWaveForm
-    // Route
-    this.route()
+    this.effects.chorus = new Tone.Chorus({ "frequency": 1.5, "delayTime": 3.5, "depth": 0.7, "type": 'sine', "spread": 180 })
+    this.effects.distortion = new Tone.Distortion({ "distortion": 2, "oversample": "none" })
+    this.effects.phaser = new Tone.Phaser({ "frequency": 0.5, "octaves": 3, "stages": 10, "Q": 10, "baseFrequency": 350 })
+    this.effects.bitcrusher = new Tone.BitCrusher({ "bits": 3 })
+    this.effects.filter = new Tone.Filter({ "type" : 'lowpass', "frequency" : 5000, "rolloff" : -24, "Q" : 1, "gain" : 0 })
+    // Route synth to destination clean
+    this.synth.toDestination()
   },
   computed: {
     notesFromKey(){
@@ -116,30 +215,38 @@ export default {
         modeList.push(notes[indexMod])
       }
       return modeList
+    },
+    inactiveEffects(){
+      return this.effectsList.filter(e => !this.activeEffects.includes(e))
     }
   },
   methods: {
-    route(){
-      // == DISCONNECTS
-      // this.effects.fbDelay.disconnect()
-      // this.effects.reverb.disconnect()
-      // this.synth.disconnect()
-
-      // == REVERB ONLY
-      // this.synth.connect(this.effects.reverb)
-      // this.effects.reverb.toDestination()
-
-      // == DELAY ONLY
-      this.synth.connect(this.effects.fbDelay)
-      this.effects.fbDelay.toDestination()
-
-      // == DELAY && REVERB
-      // this.synth.connect(this.effects.fbDelay)
-      // this.effects.fbDelay.connect(this.effects.reverb)
-      // this.effects.reverb.toDestination()
-
-      // == SYNTH DIRECT OUT CLEAN
-      // this.synth.toDestination()
+    disconnect(){
+      for(let e of this.effectsList){
+        this.effects[e].disconnect()
+      }
+      this.synth.disconnect()
+      console.log('Disconnect All Effects')
+    },
+    connect(){
+      // get list of active effects, create array of effects
+      let fx = this.activeEffects.map(x => this.effects[x])
+      fx.push(Tone.Destination)
+      this.synth.chain(...fx)
+      console.log(fx)
+    },
+    activateEffect(item){
+      this.activeEffects.push(item)
+      this.disconnect()
+      this.connect()
+    },
+    deactivateEffect(item){
+      let index = this.activeEffects.indexOf(item)
+      if (index !== -1) {
+        this.activeEffects.splice(index, 1);
+      }
+      this.disconnect()
+      this.connect()
     },
     startAudio(note) {
       this.synth.triggerAttackRelease(note, "8n")
@@ -167,12 +274,37 @@ export default {
       }
       this.seqArray = seq // sets display-able array
       return seq
+    },
+    log(data){
+      console.log(data)
     }
   },
   watch: {
-    synthWaveForm() {
-      this.synth.oscillator.type = this.synthWaveForm
+    'params.volume'(){
+      this.synth.volume.value = this.params.volume
+    },
+    'params.portamento'(){
+      this.synth.portamento = this.params.portamento
+    },
+    'params.oscillator.type'(){
+      this.synth.oscillator.type = this.params.oscillator.type
+    },
+    'params.oscillator.phase'(){
+      this.synth.oscillator.phase = this.params.oscillator.phase
+    },
+    'params.envelope.attack'(){
+      this.synth.envelope.attack = this.params.envelope.attack
+    },
+    'params.envelope.decay'(){
+      this.synth.envelope.decay = this.params.envelope.decay
+    },
+    'params.envelope.sustain'(){
+      this.synth.envelope.sustain = this.params.envelope.sustain
+    },
+    'params.envelope.release'(){
+      this.synth.envelope.release = this.params.envelope.release
     }
+
   }
 }
 </script>
@@ -249,4 +381,29 @@ export default {
   .seq-array
     font-size: 12px
     color: #999
+
+  .params
+    border: solid 1px #eee
+    background-color: #fafafa
+    border-radius: 3px
+    main
+      display: grid
+      grid-template-columns: 1fr 1fr
+    footer
+      display: block
+      padding-top: 10px
+
+  .effectlist
+    margin-bottom: 10px
+    .inactive
+      button
+        border: solid 1px #ddd
+        background-color: #eee
+        color: #333
+    .active
+      button
+        border: solid 1px darken(#42b983, 10%)
+        background-color: #42b983
+        color: #fff
+
 </style>

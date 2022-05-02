@@ -8,9 +8,7 @@ export default {
       name: 'Mid',
       octave: 3,
       phraseLength: 16,
-      noteLength: "16n",
-      volume: -2,
-      synthWaveForm: 'triangle'
+      noteLength: "16n"
     }
   }
 }
