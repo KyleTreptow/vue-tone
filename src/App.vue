@@ -1,11 +1,13 @@
 <template>
   <div id="app" class="app">
-    <!-- <h1>Music Generator</h1> -->
-    <h2>Tone and Vue.js</h2>
+
+    <h2>Sandbox</h2>
 
     <!-- Layers (start) -->
+    <Rack    v-if="true"  :notes="notes" :modes="modes" :scales="scales" ref="rack"/>
+
     <High   v-if="false" :notes="notes" :modes="modes" :scales="scales" ref="high"/>
-    <Mid    v-if="true"  :notes="notes" :modes="modes" :scales="scales" ref="mid"/>
+    <Mid    v-if="false"  :notes="notes" :modes="modes" :scales="scales" ref="mid"/>
     <Bass   v-if="false"  :notes="notes" :modes="modes" :scales="scales" ref="bass" />
     <Kick   v-if="false"  ref="kick" />
     <Snare  v-if="false"  ref="snare" />
@@ -47,9 +49,11 @@ import Kick from './components/Kick.vue'
 import Snare from './components/Snare.vue'
 import Hat from './components/Hat.vue'
 
+import Rack from './components/Rack.vue'
+
 export default {
   name: 'App',
-  components: { High, Mid, Bass, Kick, Snare, Hat },
+  components: { High, Mid, Bass, Kick, Snare, Hat, Rack },
   data(){
     return {
       notes: ['C', 'Db', 'D', 'Eb', 'E', 'F', 'Gb', 'G', 'Ab', 'A', 'Bb', 'B'],
@@ -77,7 +81,6 @@ export default {
   },
   computed: {
     layers(){
-      // Get instrument layers by grabbing keys of the refs obj
       return Object.keys(this.$refs).map(x => this.$refs[x])
     }
   },
