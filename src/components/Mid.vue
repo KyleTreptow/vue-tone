@@ -8,7 +8,7 @@ export default {
       name: 'Mid',
       octave: 3,
       phraseLength: 16,
-      noteLength: "16n"
+      noteLength: "8n"
     }
   }
 }

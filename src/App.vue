@@ -1,15 +1,15 @@
 <template>
   <div id="app" class="app">
-    <h1>Music Generator</h1>
+    <!-- <h1>Music Generator</h1> -->
     <h2>Tone and Vue.js</h2>
 
     <!-- Layers (start) -->
     <High   v-if="false" :notes="notes" :modes="modes" :scales="scales" ref="high"/>
     <Mid    v-if="true"  :notes="notes" :modes="modes" :scales="scales" ref="mid"/>
     <Bass   v-if="false"  :notes="notes" :modes="modes" :scales="scales" ref="bass" />
-    <Kick   v-if="false"  ref="kick" />
-    <Snare  v-if="false"  ref="snare" />
-    <Hat    v-if="false"  ref="hat" />
+    <Kick   v-if="true"  ref="kick" />
+    <Snare  v-if="true"  ref="snare" />
+    <Hat    v-if="true"  ref="hat" />
     <!-- Layers (end) -->
 
 

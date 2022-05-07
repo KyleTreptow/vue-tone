@@ -20,11 +20,8 @@
           <option value="1n" key="1n">1n</option>
           <option value="2n" key="2n">2n</option>
           <option value="4n" key="4n">4n</option>
-          <option value="4t" key="4t">4t</option>
           <option value="8n" key="8n">8n</option>
-          <option value="8t" key="8t">8t</option>
           <option value="16n" key="16n">16n</option>
-          <option value="16t" key="16t">16t</option>
         </select>
       </div>
       <div class="block">
@@ -40,89 +37,112 @@
       </div>
 
       <button type="button" @click="paramsActive = !paramsActive">Synth Parameters</button>
+
       <div class="params" v-if="paramsActive">
         <main>
-          <div class="osc">
-            <h4>Oscillator</h4>
-            <div>
-              <span>Vol:</span>
-              <input type="range" min="-24" max="12"
+          <div class="param">
+            <h4 class="param__header">Oscillator</h4>
+
+            <div class="control">
+              <h4>
+                <span>Volume:</span>
+                <span>{{ params.volume }} dB</span>
+              </h4>
+              <input type="range" min="-12" max="12"
                v-model="params.volume">
-               {{ params.volume }} DB
             </div>
-            <div>
-              <span>Portamento:</span>
+
+            <div class="control">
+              <h4>
+                <span>Portamento:</span>
+                <span>{{ params.portamento }}</span>
+              </h4>
               <input type="range" min="0.00" max="0.10" step="0.01"
                v-model="params.portamento">
-               {{ params.portamento }}
             </div>
-            <div>
+
+            <div class="control">
+              <h4>
+                <span>Phase:</span>
+                <span>{{ params.oscillator.phase }} deg</span>
+              </h4>
+              <input type="range" min="0" max="360"
+               v-model="params.oscillator.phase">
+            </div>
+
+            <div class="control control--select">
+              <h4>
+                <span>Waveform:</span>
+              </h4>
               <select v-model="params.oscillator.type">
                 <option v-for="wf in waveForms" :value="wf" :key="wf">{{ wf }}</option>
               </select>
             </div>
-            <div>
-              <span>Phase:</span>
-              <input type="range" min="0" max="360"
-               v-model="params.oscillator.phase">
-               {{ params.oscillator.phase }} deg
-            </div>
+
           </div>
-          <div class="env">
+          <div class="param">
             <h4>Envelope</h4>
-            <div class="">
-              <span>A:</span>
+
+            <div class="control">
+              <h4>
+                <span>Attack: </span>
+                <span>{{ params.envelope.attack }}</span>
+              </h4>
               <input type="range" min="0.01" max="2.00" step="0.01"
                v-model="params.envelope.attack">
-               {{ params.envelope.attack }}
             </div>
-            <div class="">
-              <span>D:</span>
+
+            <div class="control">
+              <h4>
+                <span>Decay: </span>
+                <span>{{ params.envelope.decay }}</span>
+              </h4>
               <input type="range" min="0.01" max="2.00" step="0.01"
                v-model="params.envelope.decay">
-               {{ params.envelope.decay }}
             </div>
-            <div class="">
-              <span>S:</span>
+
+            <div class="control">
+              <h4>
+                <span>Sustain:</span>
+                <span>{{ params.envelope.sustain }}</span>
+              </h4>
               <input type="range" min="0" max="1" step="0.01"
                v-model="params.envelope.sustain">
-               {{ params.envelope.sustain }}
             </div>
-            <div class="">
-              <span>R:</span>
+
+            <div class="control">
+              <h4>
+                <span>Release:</span>
+                <span>{{ params.envelope.release }}</span>
+              </h4>
               <input type="range" min="0.01" max="2.00" step="0.01"
                v-model="params.envelope.release">
-               {{ params.envelope.release }}
             </div>
+
           </div>
         </main>
         <footer>
+          <h4>Effects</h4>
           <div class="effectlist">
             <div class="inactive">
               <button v-for="e in inactiveEffects" :key="'effect_'+e"
-              type="button"
-              @click="activateEffect(e)">
-                {{ e }}
+              type="button" @click="activateEffect(e)">
+                {{ e }} <span>+</span>
               </button>
             </div>
             <div class="active">
               <button v-for="e in activeEffects" :key="'active_effect_'+e"
-              type="button"
-              @click="deactivateEffect(e)">
+              type="button" @click="deactivateEffect(e)">
                 {{ e }}
               </button>
             </div>
           </div>
-          <!-- <div class="">
-            <button type="button" @click="disconnect()">Disconnect</button>
-            <button type="button" @click="connect()">Connect</button>
-          </div> -->
-          <br>
+          <div class="effect-params">
+            <Phaser @init="initPhaser"/>
+          </div>
           <button type="button" @click="log(synth)">Log Synth</button>
         </footer>
       </div>
-
-
 
   </section>
   </div>
@@ -130,8 +150,10 @@
 
 <script>
 import * as Tone from 'tone'
+import Phaser from './effect/phaser.vue'
 export default {
   name: 'Synth',
+  components: { Phaser },
   props: ['notes', 'modes', 'scales'],
   data(){
     return {
@@ -149,7 +171,7 @@ export default {
       // synth parameters
       paramsActive: true,
       params: {
-        "volume": 0,
+        "volume": -10,
         "detune": 0,
         "portamento": 0.0,
           "envelope": {
@@ -166,6 +188,7 @@ export default {
             "type": 'square'
           }
       },
+      curveTypes: ['linear', 'exponential', 'sine', 'cosine', 'bounce', 'ripple', 'step'],
       // effects units
       effects: {
         fbDelay: null,
@@ -177,22 +200,74 @@ export default {
         filter: null
       },
       effectsList: ['fbDelay', 'reverb', 'chorus', 'distortion', 'phaser', 'bitcrusher', 'filter'],
-      activeEffects: []
+      activeEffects: [],
+      // filter params
+      filterParams: {
+        "type" : 'lowpass',
+        "frequency" : 12000,
+        "rolloff" : -24,
+        "Q" : 1,
+        "gain" : 2
+      },
+      // delay params
+      delayParams: {
+        "wet": 0.6,
+        "delayTime": "16n",
+        "feedback": 0.75
+      },
+      // reverb params
+      reverbParams: {
+        "wet": 0.4,
+        "decay": 1.5,
+        "preDelay": 0.01
+      },
+      // chorus params
+      chorusParams: {
+        "frequency": 1.75, // 0 - 20hz? or 0-20k??
+        "delayTime": 3.5,
+        "depth": 0.7,
+        "type": 'sine',
+        "spread": 180
+      },
+      // distortion params
+      distortionParams: {
+        "distortion": 0.5,
+        "oversample": 'none'
+      },
+      // bitcrusher params
+      bitcrusherParams: {
+        "bits": 5
+      }
+
     }
   },
   mounted() {
     // Init Synth
     this.synth = new Tone.Synth(this.params)
     // Init Effects
-    this.effects.fbDelay = new Tone.FeedbackDelay({ "wet": 1, "delayTime": "8n", "feedback": 0.35 })
-    this.effects.reverb = new Tone.Reverb({ "wet": 0.4, "decay": 1.5, "preDelay": 0.01 })
-    this.effects.chorus = new Tone.Chorus({ "frequency": 1.5, "delayTime": 3.5, "depth": 0.7, "type": 'sine', "spread": 180 })
-    this.effects.distortion = new Tone.Distortion({ "distortion": 2, "oversample": "none" })
-    this.effects.phaser = new Tone.Phaser({ "frequency": 0.5, "octaves": 3, "stages": 10, "Q": 10, "baseFrequency": 350 })
-    this.effects.bitcrusher = new Tone.BitCrusher({ "bits": 3 })
-    this.effects.filter = new Tone.Filter({ "type" : 'lowpass', "frequency" : 5000, "rolloff" : -24, "Q" : 1, "gain" : 0 })
+    this.effects.fbDelay = new Tone.FeedbackDelay(this.delayParams)
+      // this.effects.fbDelay.wet.rampTo(1, 3)
+    this.effects.reverb = new Tone.Reverb(this.reverbParams)
+    this.effects.chorus = new Tone.Chorus(this.chorusParams)
+    this.effects.distortion = new Tone.Distortion(this.distortionParams)
+    // this.effects.phaser = new Tone.Phaser(this.phaserParams)
+    this.effects.bitcrusher = new Tone.BitCrusher(this.bitcrusherParams)
+    this.effects.filter = new Tone.Filter(this.filterParams)
     // Route synth to destination clean
     this.synth.toDestination()
+
+    // LFO Test
+    // this.synth.chain(this.effects.filter, this.effects.fbDelay, Tone.Destination)
+
+    // const lfo = new Tone.LFO({
+    //   min: 0,
+    //   max: 1,
+    //   frequency: '1n'
+    // })
+    // lfo.start()
+    // lfo.connect(this.effects.phaser.wet)
+
+
   },
   computed: {
     notesFromKey(){
@@ -221,6 +296,7 @@ export default {
     }
   },
   methods: {
+    // ROUTING
     disconnect(){
       for(let e of this.effectsList){
         this.effects[e].disconnect()
@@ -229,7 +305,6 @@ export default {
       console.log('Disconnect All Effects')
     },
     connect(){
-      // get list of active effects, create array of effects
       let fx = this.activeEffects.map(x => this.effects[x])
       fx.push(Tone.Destination)
       this.synth.chain(...fx)
@@ -248,8 +323,13 @@ export default {
       this.disconnect()
       this.connect()
     },
+    // EFFECT MODULE
+    initPhaser(module){
+      this.effects.phaser = module
+    },
+    // MUSIC GEN
     startAudio(note) {
-      this.synth.triggerAttackRelease(note, "8n")
+      this.synth.triggerAttackRelease(note, "4n")
     },
     createSequence(){ // creates a Tone sequence from pattern of notes
       let that = this
@@ -275,36 +355,25 @@ export default {
       this.seqArray = seq // sets display-able array
       return seq
     },
+    // DEV
     log(data){
       console.log(data)
     }
   },
   watch: {
-    'params.volume'(){
-      this.synth.volume.value = this.params.volume
-    },
-    'params.portamento'(){
-      this.synth.portamento = this.params.portamento
-    },
-    'params.oscillator.type'(){
-      this.synth.oscillator.type = this.params.oscillator.type
-    },
-    'params.oscillator.phase'(){
-      this.synth.oscillator.phase = this.params.oscillator.phase
-    },
-    'params.envelope.attack'(){
-      this.synth.envelope.attack = this.params.envelope.attack
-    },
-    'params.envelope.decay'(){
-      this.synth.envelope.decay = this.params.envelope.decay
-    },
-    'params.envelope.sustain'(){
-      this.synth.envelope.sustain = this.params.envelope.sustain
-    },
-    'params.envelope.release'(){
-      this.synth.envelope.release = this.params.envelope.release
+    params: {
+       handler(){
+         this.synth.volume.value = this.params.volume
+         this.synth.portamento = this.params.portamento
+         this.synth.oscillator.type = this.params.oscillator.type
+         this.synth.oscillator.phase = this.params.oscillator.phase
+         this.synth.envelope.attack = this.params.envelope.attack
+         this.synth.envelope.decay = this.params.envelope.decay
+         this.synth.envelope.sustain = this.params.envelope.sustain
+         this.synth.envelope.release = this.params.envelope.release
+       },
+       deep: true
     }
-
   }
 }
 </script>
@@ -386,12 +455,22 @@ export default {
     border: solid 1px #eee
     background-color: #fafafa
     border-radius: 3px
+    display: block
+    width: 600px
+    max-width: 100%
+    margin: auto
+    h4
+      margin: 0
     main
       display: grid
       grid-template-columns: 1fr 1fr
     footer
       display: block
-      padding-top: 10px
+
+  .param
+    padding-top: 10px
+    > h4
+      margin: 0 0 10px 0
 
   .effectlist
     margin-bottom: 10px
@@ -405,5 +484,37 @@ export default {
         border: solid 1px darken(#42b983, 10%)
         background-color: #42b983
         color: #fff
+
+  // CONTROL
+  .control
+    display: block
+    padding: 10px 20px
+    border: dotted 1px #ddd
+    h4
+      font-weight: bold
+      font-size: 12px
+      text-align: left
+      margin-bottom: 6px
+      span
+        display: inline-block
+        &:first-child
+          text-transform: uppercase
+        &:last-child
+          padding-left: 10px
+    input
+      &[type="range"]
+        display: block
+        width: 100%
+        height: 6px
+    &--select
+      display: grid
+      grid-template-columns: 2fr 3fr
+      h4,
+      select
+        line-height: 30px
+      h4
+        margin-bottom: 0
+      select
+        padding: 0 8px
 
 </style>
