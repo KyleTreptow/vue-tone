@@ -1,20 +1,20 @@
 <script>
-// import * as Tone from 'tone'
 export default {
+  props: ['active'],
   data(){
-    return {
-      params: {},
-      module: null
-    }
+    return {}
   },
   mounted(){
-    // this.module = new Tone.Phaser(this.phaserParams)
-    // this.$emit('init', this.module)
+    // this.$emit('init', { module: this.module, target: this.name })
   }
 }
 </script>
 
 <style lang="sass" scoped>
+  // FX
+  .fx
+    > h4 
+      margin: 0
   // Params
   .params
     display: grid

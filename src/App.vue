@@ -12,7 +12,6 @@
     <Hat    v-if="false"  ref="hat" />
     <!-- Layers (end) -->
 
-
     <div>
       <div class="globals">
         <select v-model="globalKey" @change="changeGlobalKey(globalKey)">

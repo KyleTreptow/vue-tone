@@ -1,15 +1,13 @@
 <template lang="html">
-  <div class="">
-    <h4>
-      <span>Phaser</span>
-    </h4>
-    <main class="params">
+  <div class="fx" v-if="active">
+    <h4>Phaser</h4>
+    <div class="params">
       <div class="control">
         <h4>
           <span>Dry/Wet: </span>
           <span>{{ params.wet }}</span>
         </h4>
-        <input type="range" min="0" max="1" step="0.1"
+        <input type="range" min="0.00" max="1.00" step="0.01"
         v-model="params.wet"
         @change="module.wet.value = params.wet">
       </div>
@@ -28,11 +26,19 @@
         </h4>
         <select v-model="params.octaves"
         @change="module.octaves = params.octaves">
-        {{ params.octaves }} >
           <option v-for="i in 5" :value="i" :key="i">{{ i }}</option>
         </select>
       </div>
-    </main>
+      <div class="control">
+        <h4>
+          <span>Base Frequency: </span>
+          <span>{{ params.baseFrequency }}</span>
+        </h4>
+        <input type="range" min="350" max="1000"
+        v-model="params.baseFrequency"
+        @change="module.baseFrequency = params.baseFrequency">
+      </div>
+    </div>
   </div>
 </template>
 
@@ -43,6 +49,7 @@ export default {
   extends: Effect,
   data(){
     return {
+      name: 'phaser',
       params: {
         "wet": 1,
         "frequency": 1,
@@ -50,12 +57,13 @@ export default {
         "stages": 10,
         "Q": 10,
         "baseFrequency": 350
-      }
+      },
+      module: null
     }
   },
   mounted(){
-    this.module = new Tone.Phaser(this.phaserParams)
-    this.$emit('init', this.module)
+    this.module = new Tone.Phaser(this.params)
+    this.$emit('init', { module: this.module, target: this.name })
   }
 }
 </script>

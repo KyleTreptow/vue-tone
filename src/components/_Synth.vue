@@ -1,6 +1,7 @@
 <template>
   <div class="">
     <section>
+
       <div class="block">
         <span><b>{{ name }}: &nbsp; </b></span>
         <select v-model="octave">
@@ -8,22 +9,14 @@
         </select>
         &nbsp; <span>Phrase Length:</span> &nbsp;
         <select v-model="phraseLength">
-          <option value="2" key="2">2</option>
-          <option value="4" key="4">4</option>
-          <option value="8" key="8">8</option>
-          <option value="16" key="16">16</option>
-          <option value="32" key="32">32</option>
-          <option value="64" key="64">64</option>
+          <option v-for="n in phraseLengthList" :value="n" :key="n">{{ n }}</option>
         </select>
         &nbsp; <span>Note Length:</span> &nbsp;
         <select v-model="noteLength">
-          <option value="1n" key="1n">1n</option>
-          <option value="2n" key="2n">2n</option>
-          <option value="4n" key="4n">4n</option>
-          <option value="8n" key="8n">8n</option>
-          <option value="16n" key="16n">16n</option>
+          <option v-for="n in noteLengthList" :value="n" :key="n">{{ n }}</option>
         </select>
       </div>
+
       <div class="block">
         <button v-for="note in notesFromKey"
           :key="'note-'+note"
@@ -48,8 +41,9 @@
                 <span>Volume:</span>
                 <span>{{ params.volume }} dB</span>
               </h4>
-              <input type="range" min="-12" max="12"
-               v-model="params.volume">
+              <input type="range" min="-24" max="24"
+               v-model="params.volume"
+               @change="synth.volume.value = params.volume">
             </div>
 
             <div class="control">
@@ -58,7 +52,8 @@
                 <span>{{ params.portamento }}</span>
               </h4>
               <input type="range" min="0.00" max="0.10" step="0.01"
-               v-model="params.portamento">
+               v-model="params.portamento"
+               @change="synth.portamento = params.portamento">
             </div>
 
             <div class="control">
@@ -131,26 +126,44 @@
               </button>
             </div>
             <div class="active">
-              <span v-for="e in activeEffects" :key="'active_effect_'+e" class="">
+              <span v-for="e in activeEffects" :key="'active_effect_'+e">
                 <button type="button" @click="deactivateEffect(e)">
                   {{ e }}
                 </button>
                 <button type="button"
-                @click="displayEffectParam == 'phaser' ? displayEffectParam = null : displayEffectParam = 'phaser' ">
-                  {{ displayEffectParam == 'phaser' ? '-' : '+' }}
+                @click="displayEffectParam == e ? displayEffectParam = null : displayEffectParam = e ">
+                  {{ displayEffectParam == e ? '-' : '+' }}
                 </button>
               </span>
             </div>
           </div>
           <div class="effect-params">
 
-            <component v-if="displayEffectParam == 'phaser'"
-            :is="'phaser'"
-            @init="initPhaser"
-            @close="closeEffectParams" />
+            <component :is="'delay'" :active="displayEffectParam == 'delay'"
+            @init="initEffect" @close="closeEffectParams">
+            </component>
+            <component :is="'reverb'" :active="displayEffectParam == 'reverb'"
+            @init="initEffect" @close="closeEffectParams">
+            </component>
+            <component :is="'chorus'" :active="displayEffectParam == 'chorus'"
+            @init="initEffect" @close="closeEffectParams">
+            </component>
+            <component :is="'distortion'" :active="displayEffectParam == 'distortion'"
+            @init="initEffect" @close="closeEffectParams">
+            </component>
+            <component :is="'phaser'" :active="displayEffectParam == 'phaser'"
+            @init="initEffect" @close="closeEffectParams">
+            </component>
+            <component :is="'bitcrusher'" :active="displayEffectParam == 'bitcrusher'"
+            @init="initEffect" @close="closeEffectParams">
+            </component>
+            <component :is="'ffilter'" :active="displayEffectParam == 'ffilter'"
+            @init="initEffect" @close="closeEffectParams">
+            </component>
+
 
           </div>
-          <button type="button" @click="log(synth)">Log Synth</button>
+          <!-- <button type="button" @click="log(synth)">Log Synth</button> -->
         </footer>
       </div>
 
@@ -160,10 +173,16 @@
 
 <script>
 import * as Tone from 'tone'
-import Phaser from './effect/phaser.vue'
+import Phaser from './effect/Phaser.vue'
+import Delay from './effect/Delay.vue'
+import Reverb from './effect/Reverb.vue'
+import Chorus from './effect/Chorus.vue'
+import Distortion from './effect/Distortion.vue'
+import Bitcrusher from './effect/Bitcrusher.vue'
+import Ffilter from './effect/Ffilter.vue'
 export default {
   name: 'Synth',
-  components: { Phaser },
+  components: { Phaser, Delay, Reverb, Chorus, Distortion, Bitcrusher, Ffilter },
   props: ['notes', 'modes', 'scales'],
   data(){
     return {
@@ -172,14 +191,16 @@ export default {
       activeKey: 'C',
       octave: 4,
       activeMode: 'aeolian',
+      phraseLengthList: [2, 4, 8, 16, 32, 64],
       phraseLength: 32,
+      noteLengthList: ['1n', '2n', '4n', '8n', '16n'],
       noteLength: "8n",
       displaySeqArr: false,
       seqArray: [],
       liveNote: null,
       waveForms: ['sine', 'triangle', 'square', 'sawtooth'],
       // synth parameters
-      paramsActive: true,
+      paramsActive: false,
       params: {
         "volume": -10,
         "detune": 0,
@@ -201,7 +222,7 @@ export default {
       curveTypes: ['linear', 'exponential', 'sine', 'cosine', 'bounce', 'ripple', 'step'],
       // effects units
       effects: {
-        fbDelay: null,
+        delay: null,
         reverb: null,
         chorus: null,
         distortion: null,
@@ -209,67 +230,18 @@ export default {
         bitcrusher: null,
         filter: null
       },
-      effectsList: ['fbDelay', 'reverb', 'chorus', 'distortion', 'phaser', 'bitcrusher', 'filter'],
+      effectsList: ['delay', 'reverb', 'chorus', 'distortion', 'phaser', 'bitcrusher', 'ffilter'],
       activeEffects: [],
-      // Display Effects Params
-      displayEffectParam: null,
-      // filter params
-      filterParams: {
-        "type" : 'lowpass',
-        "frequency" : 12000,
-        "rolloff" : -24,
-        "Q" : 1,
-        "gain" : 2
-      },
-      // delay params
-      delayParams: {
-        "wet": 0.6,
-        "delayTime": "16n",
-        "feedback": 0.75
-      },
-      // reverb params
-      reverbParams: {
-        "wet": 0.4,
-        "decay": 1.5,
-        "preDelay": 0.01
-      },
-      // chorus params
-      chorusParams: {
-        "frequency": 1.75, // 0 - 20hz? or 0-20k??
-        "delayTime": 3.5,
-        "depth": 0.7,
-        "type": 'sine',
-        "spread": 180
-      },
-      // distortion params
-      distortionParams: {
-        "distortion": 0.5,
-        "oversample": 'none'
-      },
-      // bitcrusher params
-      bitcrusherParams: {
-        "bits": 5
-      }
-
+      displayEffectParam: null
     }
   },
   mounted() {
-    // Init Synth
+    // Init Synth & route to destination clean
     this.synth = new Tone.Synth(this.params)
-    // Init Effects
-    this.effects.fbDelay = new Tone.FeedbackDelay(this.delayParams)
-      // this.effects.fbDelay.wet.rampTo(1, 3)
-    this.effects.reverb = new Tone.Reverb(this.reverbParams)
-    this.effects.chorus = new Tone.Chorus(this.chorusParams)
-    this.effects.distortion = new Tone.Distortion(this.distortionParams)
-    // this.effects.phaser = new Tone.Phaser(this.phaserParams)
-    this.effects.bitcrusher = new Tone.BitCrusher(this.bitcrusherParams)
-    this.effects.filter = new Tone.Filter(this.filterParams)
-    // Route synth to destination clean
     this.synth.toDestination()
 
     // LFO Test
-    // this.synth.chain(this.effects.filter, this.effects.fbDelay, Tone.Destination)
+    // this.synth.chain(this.effects.filter, this.effects.delay, Tone.Destination)
 
     // const lfo = new Tone.LFO({
     //   min: 0,
@@ -279,6 +251,8 @@ export default {
     // lfo.start()
     // lfo.connect(this.effects.phaser.wet)
 
+    // Ramp Values
+    // this.effects.delay.wet.rampTo(1, 3)
 
   },
   computed: {
@@ -310,11 +284,13 @@ export default {
   methods: {
     // ROUTING
     disconnect(){
+      console.log(this.effects)
       for(let e of this.effectsList){
-        this.effects[e].disconnect()
+        if(this.effects.length){
+          this.effects[e].disconnect()
+        }
       }
       this.synth.disconnect()
-      console.log('Disconnect All Effects')
     },
     connect(){
       let fx = this.activeEffects.map(x => this.effects[x])
@@ -328,6 +304,9 @@ export default {
       this.connect()
     },
     deactivateEffect(item){
+      let e = this.displayEffectParam
+      this.displayEffectParam = (e == item) ? null : e
+      // ####
       let index = this.activeEffects.indexOf(item)
       if (index !== -1) {
         this.activeEffects.splice(index, 1);
@@ -336,8 +315,8 @@ export default {
       this.connect()
     },
     // EFFECT MODULE
-    initPhaser(module){
-      this.effects.phaser = module
+    initEffect({ module, target }){
+      this.effects[target] = module
     },
     closeEffectParams(value){
       this.displayEffectParam = value
@@ -381,10 +360,12 @@ export default {
   watch: {
     params: {
        handler(){
-         this.synth.volume.value = this.params.volume
-         this.synth.portamento = this.params.portamento
+         // this.synth.volume.value = this.params.volume
+         // this.synth.portamento = this.params.portamento
+
          this.synth.oscillator.type = this.params.oscillator.type
          this.synth.oscillator.phase = this.params.oscillator.phase
+
          this.synth.envelope.attack = this.params.envelope.attack
          this.synth.envelope.decay = this.params.envelope.decay
          this.synth.envelope.sustain = this.params.envelope.sustain
@@ -493,6 +474,7 @@ export default {
   .effectlist
     margin-bottom: 10px
     .inactive
+      margin-bottom: 10px
       button
         border: solid 1px #ddd
         background-color: #eee
@@ -515,6 +497,8 @@ export default {
           &:last-child
             border-top-right-radius: 3px
             border-bottom-right-radius: 3px
+            background-color: #2c3e50
+            border-color: #2c3e50
 
   // CONTROL
   .control
