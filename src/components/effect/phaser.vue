@@ -1,37 +1,46 @@
 <template lang="html">
   <div class="">
-    <h4>Phaser</h4>
-    
-    <div class="control">
-      <span>Dry/Wet</span>
-      <input type="range" min="0" max="1" step="0.1"
-      v-model="params.wet"
-      @change="module.wet.value = params.wet">
-      {{ params.wet }}
-    </div>
-
-    <div class="">
-      <span>Frequency</span>
-      <input type="range" min="0" max="300"
-      v-model="params.frequency"
-      @change="module.frequency.value = params.frequency">
-      {{ params.frequency }}
-    </div>
-    <div class="">
-      <span>Octaves</span>
-      <select v-model="params.octaves"
-      @change="module.octaves = params.octaves">
-      {{ params.octaves }} >
-        <option v-for="i in 5" :value="i" :key="i">{{ i }}</option>
-      </select>
-    </div>
+    <h4>
+      <span>Phaser</span>
+    </h4>
+    <main class="params">
+      <div class="control">
+        <h4>
+          <span>Dry/Wet: </span>
+          <span>{{ params.wet }}</span>
+        </h4>
+        <input type="range" min="0" max="1" step="0.1"
+        v-model="params.wet"
+        @change="module.wet.value = params.wet">
+      </div>
+      <div class="control">
+        <h4>
+          <span>Frequency: </span>
+          <span>{{ params.frequency }}</span>
+        </h4>
+        <input type="range" min="0" max="300"
+        v-model="params.frequency"
+        @change="module.frequency.value = params.frequency">
+      </div>
+      <div class="control control--select">
+        <h4>
+          <span>Octaves: </span>
+        </h4>
+        <select v-model="params.octaves"
+        @change="module.octaves = params.octaves">
+        {{ params.octaves }} >
+          <option v-for="i in 5" :value="i" :key="i">{{ i }}</option>
+        </select>
+      </div>
+    </main>
   </div>
-
 </template>
 
 <script>
 import * as Tone from 'tone'
+import Effect from './_effect.vue'
 export default {
+  extends: Effect,
   data(){
     return {
       params: {
@@ -41,8 +50,7 @@ export default {
         "stages": 10,
         "Q": 10,
         "baseFrequency": 350
-      },
-      module: null
+      }
     }
   },
   mounted(){
@@ -51,6 +59,3 @@ export default {
   }
 }
 </script>
-
-<style lang="css">
-</style>

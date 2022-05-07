@@ -131,14 +131,24 @@
               </button>
             </div>
             <div class="active">
-              <button v-for="e in activeEffects" :key="'active_effect_'+e"
-              type="button" @click="deactivateEffect(e)">
-                {{ e }}
-              </button>
+              <span v-for="e in activeEffects" :key="'active_effect_'+e" class="">
+                <button type="button" @click="deactivateEffect(e)">
+                  {{ e }}
+                </button>
+                <button type="button"
+                @click="displayEffectParam == 'phaser' ? displayEffectParam = null : displayEffectParam = 'phaser' ">
+                  {{ displayEffectParam == 'phaser' ? '-' : '+' }}
+                </button>
+              </span>
             </div>
           </div>
           <div class="effect-params">
-            <Phaser @init="initPhaser"/>
+
+            <component v-if="displayEffectParam == 'phaser'"
+            :is="'phaser'"
+            @init="initPhaser"
+            @close="closeEffectParams" />
+
           </div>
           <button type="button" @click="log(synth)">Log Synth</button>
         </footer>
@@ -201,6 +211,8 @@ export default {
       },
       effectsList: ['fbDelay', 'reverb', 'chorus', 'distortion', 'phaser', 'bitcrusher', 'filter'],
       activeEffects: [],
+      // Display Effects Params
+      displayEffectParam: null,
       // filter params
       filterParams: {
         "type" : 'lowpass',
@@ -326,6 +338,12 @@ export default {
     // EFFECT MODULE
     initPhaser(module){
       this.effects.phaser = module
+    },
+    closeEffectParams(value){
+      this.displayEffectParam = value
+    },
+    openEffectparam(module){
+      this.displayEffectParam = module
     },
     // MUSIC GEN
     startAudio(note) {
@@ -480,10 +498,23 @@ export default {
         background-color: #eee
         color: #333
     .active
-      button
-        border: solid 1px darken(#42b983, 10%)
-        background-color: #42b983
-        color: #fff
+      span
+        display: inline-block
+        font-size: 0
+        button
+          border: solid 1px darken(#42b983, 10%)
+          background-color: #42b983
+          color: #fff
+          display: inline-block
+          appearance: none
+          font-size: 14px
+          border-radius: 0
+          &:first-child
+            border-top-left-radius: 3px
+            border-bottom-left-radius: 3px
+          &:last-child
+            border-top-right-radius: 3px
+            border-bottom-right-radius: 3px
 
   // CONTROL
   .control

@@ -7,9 +7,9 @@
     <High   v-if="false" :notes="notes" :modes="modes" :scales="scales" ref="high"/>
     <Mid    v-if="true"  :notes="notes" :modes="modes" :scales="scales" ref="mid"/>
     <Bass   v-if="false"  :notes="notes" :modes="modes" :scales="scales" ref="bass" />
-    <Kick   v-if="true"  ref="kick" />
-    <Snare  v-if="true"  ref="snare" />
-    <Hat    v-if="true"  ref="hat" />
+    <Kick   v-if="false"  ref="kick" />
+    <Snare  v-if="false"  ref="snare" />
+    <Hat    v-if="false"  ref="hat" />
     <!-- Layers (end) -->
 
 
