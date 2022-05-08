@@ -32,15 +32,22 @@
       <div class="testing">
         <div class="">
           <h5>Octave From C</h5>
-          {{ getOctaveFromC() }}
+          {{ getOctaveFromC({range: 2}) }}
         </div>
         <div class="">
           <h5>Octave From Root</h5>
-          {{ getOctaveFromRoot() }}
+          {{ getOctaveFromRoot({range: 2}) }}
         </div>
         <div class="">
           <h5>Notes From Mode</h5>
           {{ getNotesFromMode() }}
+        </div>
+        <div class="">
+          <h5>Notes From Mode x2 Octaves</h5>
+          {{ getNotesFromMode({range: 2}) }}
+        </div>
+        <div class="">
+          {{ seqArray }}
         </div>
       </div>
 
@@ -152,12 +159,12 @@ export default {
       octave: 3,
       activeMode: 'aeolian',
       phraseLengthList: [2, 4, 8, 16, 32, 64],
-      phraseLength: 32,
+      phraseLength: 8,
       noteLengthList: ['1n', '2n', '4n', '8n', '16n'],
       noteLength: "8n",
-      seqArray: [],
       liveNote: null,
       waveForms: ['sine', 'triangle', 'square', 'sawtooth'],
+      seqArray: [],
       paramsActive: false,
       params: {
         "volume": -10,
@@ -195,13 +202,13 @@ export default {
   mounted() {
     this.synth = new Tone.Synth(this.params)
     this.effects.delay = new Tone.FeedbackDelay({
-      "wet": 0.6,
+      "wet": 0.35,
       "delayTime": "16n",
-      "feedback": 0.75
+      "feedback": 0.65
     })
     this.effects.filter = new Tone.Filter({
       "type" : 'lowpass',
-      "frequency" : 400,
+      "frequency" : 3000,
       "rolloff" : -24,
       "Q" : 1,
       "gain" : 2
@@ -217,7 +224,7 @@ export default {
       max: 10000,
       frequency: '16n'
     })
-    this.freqLFO.start()
+    // this.freqLFO.start()
     // this.freqLFO.connect(this.effects.filter.frequency)
     this.synth.chain(this.effects.delay, this.effects.reverb, this.effects.filter, Tone.Destination)
 
@@ -298,45 +305,58 @@ export default {
       return synthPart
     },
     // Pattern Gen
-    getOctaveFromC({start = this.octave, num = 1} = {}){
+    getOctaveFromC({base = this.octave, range = 1, nums = true} = {}){
       let noteList = []
-      for(let i = 0; i < num; i++){
+      for(let i = 0; i < range; i++){
         noteList = noteList.concat(this.notes)
       }
       noteList = noteList.map((n, i) => {
-        return n + Number(Math.floor(i/12) + start)
+        return n + (nums ? Number(Math.floor(i/12) + base) : '')
       })
       return noteList
     },
-    getOctaveFromRoot(){
-      let notes = this.getOctaveFromC({num: 2})
-      let keyIndex = notes.indexOf(this.activeKey + this.octave)
-      return notes.slice(keyIndex, keyIndex+12)
+    getOctaveFromRoot({base = this.octave, range = 1, nums = true} = {}){
+      let notes = this.getOctaveFromC({ 'base': base, 'range': range, 'nums': nums })
+      let keyIndex = notes.indexOf(this.activeKey + (nums ? this.octave : ''))
+      return notes.slice(keyIndex, keyIndex+(12 * range))
     },
-    getNotesFromMode(){ 
-      let notes = this.getOctaveFromRoot()
+    getNotesFromMode({base = this.octave, range = 1, nums = true} = {}){
+      let notes = this.getOctaveFromRoot({ 'base': base, 'range': range, 'nums': nums })
       let modeSteps = this.scales[this.activeMode]
       let modeList = [], indexMod = 0
       modeList.push(notes[0])
-      for(let i = 1; i < modeSteps.length; i++){
+      for(let i = 1; i < (modeSteps.length); i++){
         indexMod += modeSteps[i]
         modeList.push(notes[indexMod])
       }
       return modeList
     },
     generatePattern(){
-      let notes = [...this.modeTones]
+      let notes = this.getNotesFromMode()
+      notes.push(null)
       let seq = []
       for (let i = 0; i < this.phraseLength; i++) { // phraseLength: 2, 4, 8, 16, 32, 64 etc.
-        let rand = Math.floor(Math.random() * 9)
-        if(rand == 9){ seq.push(null) } // push rest (null) note
-        else { seq.push(notes[rand]) } // push random note from mode
+        let nest = this.rand(3)
+        if(nest == 0 || nest == 1){ // Single Note
+          seq.push(this.randNote(notes))
+        } else { // Nested Array
+          let seq2 = []
+          for (let j = 0; j < 2; j++){
+            seq2.push(this.randNote(notes))
+          }
+          seq.push(seq2)
+        }
       }
-      this.seqArray = seq // sets display-able array
+      this.seqArray = seq
       return seq
     },
     rand(max){
-      return Math.floor(Math.random() * (max ? max : 10))
+      let rnum = Math.floor(Math.random() * (max ? max : 10))
+      // console.log(rnum)
+      return rnum
+    },
+    randNote(notes){
+      return notes[this.rand(notes.length -1)]
     },
     genMotif(){
       // note length pattern: 1n, 2n, 4n, 8n, 16n
