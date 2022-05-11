@@ -32,11 +32,19 @@
       <div class="testing">
         <div class="">
           <h5>Octave From C</h5>
-          {{ getOctaveFromC({range: 2}) }}
+          {{ getOctaveFromC() }}
         </div>
         <div class="">
           <h5>Octave From Root</h5>
+          {{ getOctaveFromRoot() }}
+        </div>
+        <div class="">
+          <h5>Octave From Root x2 Octaves</h5>
           {{ getOctaveFromRoot({range: 2}) }}
+        </div>
+        <div class="">
+          <h5>Mode Tones</h5>
+          {{ modeTones }}
         </div>
         <div class="">
           <h5>Notes From Mode</h5>
@@ -202,13 +210,13 @@ export default {
   mounted() {
     this.synth = new Tone.Synth(this.params)
     this.effects.delay = new Tone.FeedbackDelay({
-      "wet": 0.35,
-      "delayTime": "16n",
-      "feedback": 0.65
+      "wet": 0.2,
+      "delayTime": "8n",
+      "feedback": 0.45
     })
     this.effects.filter = new Tone.Filter({
       "type" : 'lowpass',
-      "frequency" : 3000,
+      "frequency" : 6500,
       "rolloff" : -24,
       "Q" : 1,
       "gain" : 2
@@ -300,7 +308,7 @@ export default {
           s.triggerAttackRelease(note, "10hz", time) // note, release (10hz or 16n?), time
           that.liveNote = note
         },
-        notes, "4n"
+        notes, "8n"
       );
       return synthPart
     },
@@ -315,24 +323,25 @@ export default {
       })
       return noteList
     },
-    getOctaveFromRoot({base = this.octave, range = 1, nums = true} = {}){
-      let notes = this.getOctaveFromC({ 'base': base, 'range': range, 'nums': nums })
-      let keyIndex = notes.indexOf(this.activeKey + (nums ? this.octave : ''))
-      return notes.slice(keyIndex, keyIndex+(12 * range))
+    getOctaveFromRoot({base = this.octave, range = 2, nums = true} = {}){
+      const notes = this.getOctaveFromC({ 'base': base, 'range': range, 'nums': nums })
+      let keyIndex = notes.indexOf(this.activeKey + this.octave)
+      return notes.slice(keyIndex, keyIndex + (12 * range))
     },
-    getNotesFromMode({base = this.octave, range = 1, nums = true} = {}){
-      let notes = this.getOctaveFromRoot({ 'base': base, 'range': range, 'nums': nums })
+    getNotesFromMode(){
+      const notes = this.getOctaveFromRoot()
       let modeSteps = this.scales[this.activeMode]
-      let modeList = [], indexMod = 0
+      let modeList = []
+      let modeIndex = 0
       modeList.push(notes[0])
-      for(let i = 1; i < (modeSteps.length); i++){
-        indexMod += modeSteps[i]
-        modeList.push(notes[indexMod])
+      for(let i = 1; i < modeSteps.length; i++){
+        modeIndex = modeIndex + modeSteps[i]
+        modeList.push(notes[modeIndex])
       }
       return modeList
     },
     generatePattern(){
-      let notes = this.getNotesFromMode()
+      const notes = this.getNotesFromMode()
       notes.push(null)
       let seq = []
       for (let i = 0; i < this.phraseLength; i++) { // phraseLength: 2, 4, 8, 16, 32, 64 etc.
