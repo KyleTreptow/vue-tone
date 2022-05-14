@@ -203,8 +203,8 @@ export default {
   mounted() {
     this.synth = new Tone.Synth(this.params)
     this.effects.delay = new Tone.FeedbackDelay({
-      "wet": 0.2,
-      "delayTime": "8n",
+      "wet": 0.6,
+      "delayTime": "16n",
       "feedback": 0.45
     })
     this.effects.filter = new Tone.Filter({
@@ -308,6 +308,7 @@ export default {
     // Pattern Gen
     getOctaveFromC({base = this.octave, range = 1, nums = true} = {}){
       let noteList = []
+      console.log(base, range, nums)
       for(let i = 0; i < range; i++){
         noteList = noteList.concat(this.notes)
       }
