@@ -86,18 +86,16 @@ export default {
     }
   },
   methods: {
-    changeBpm(bpm){
-      Tone.Transport.bpm.value = bpm
-    },
+    changeBpm(bpm){ Tone.Transport.bpm.value = bpm },
     play(){
       if (Tone.context.state !== 'running') {
         Tone.context.resume()
       }
-      for(const layer of this.layers) {
-        let synthPart = layer.createSequence()
-        synthPart.start()
-      }
       if (!this.playing) {
+        for(const layer of this.layers) {
+          let synthPart = layer.createSequence()
+          synthPart.start()
+        }
         Tone.Transport.start()
         this.playing = true
       } else {

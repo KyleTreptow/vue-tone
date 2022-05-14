@@ -31,33 +31,26 @@
 
       <div class="testing">
         <div class="">
-          <h5>Octave From C</h5>
-          {{ getOctaveFromC() }}
-        </div>
-        <div class="">
-          <h5>Octave From Root</h5>
+          <h5>Octave from Root</h5>
           {{ getOctaveFromRoot() }}
         </div>
         <div class="">
-          <h5>Octave From Root x2 Octaves</h5>
-          {{ getOctaveFromRoot({range: 2}) }}
-        </div>
-        <div class="">
           <h5>Mode Tones</h5>
-          {{ modeTones }}
+          {{ reduceOctaveToMode() }}
         </div>
         <div class="">
-          <h5>Notes From Mode</h5>
-          {{ getNotesFromMode() }}
-        </div>
-        <div class="">
-          <h5>Notes From Mode x2 Octaves</h5>
+          <h5>Mult Oct</h5>
           {{ getNotesFromMode({range: 2}) }}
         </div>
         <div class="">
+          <h5>SEQUENCE</h5>
           {{ seqArray }}
         </div>
       </div>
+
+
+
+      <button type="button" @click="createSequence()">Create Sequence</button>
 
       <button type="button" @click="paramsActive = !paramsActive">Synth Parameters</button>
 
@@ -266,7 +259,7 @@ export default {
   methods: {
     // ROUTING
     disconnect(){
-      console.log(this.effects)
+      // console.log(this.effects)
       for(let e of this.effectsList){
         if(this.effects.length){
           this.effects[e].disconnect()
@@ -278,7 +271,7 @@ export default {
       let fx = this.activeEffects.map(x => this.effects[x])
       fx.push(Tone.Destination)
       this.synth.chain(...fx)
-      console.log(fx)
+      // console.log(fx)
     },
     activateEffect(item){
       this.activeEffects.push(item)
@@ -319,30 +312,38 @@ export default {
         noteList = noteList.concat(this.notes)
       }
       noteList = noteList.map((n, i) => {
-        return n + (nums ? Number(Math.floor(i/12) + base) : '')
+        return n + (i < 12 ? this.octave : this.octave +1)
       })
       return noteList
     },
-    getOctaveFromRoot({base = this.octave, range = 2, nums = true} = {}){
-      const notes = this.getOctaveFromC({ 'base': base, 'range': range, 'nums': nums })
-      let keyIndex = notes.indexOf(this.activeKey + this.octave)
+    getOctaveFromRoot({base = this.octave, range = 1, nums = true} = {}){
+      const notes = this.getOctaveFromC({ 'base': base, 'range': range + 1, 'nums': nums })
+      let keyIndex = notes.indexOf(this.activeKey + base)
       return notes.slice(keyIndex, keyIndex + (12 * range))
     },
-    getNotesFromMode(){
-      const notes = this.getOctaveFromRoot()
+    reduceOctaveToMode({base = this.octave} = {}){
+      const notes = this.getOctaveFromRoot({'base': base})
       let modeSteps = this.scales[this.activeMode]
       let modeList = []
       let modeIndex = 0
       modeList.push(notes[0])
-      for(let i = 1; i < modeSteps.length; i++){
+      for(let i = 1; i < (modeSteps.length); i++){
         modeIndex = modeIndex + modeSteps[i]
         modeList.push(notes[modeIndex])
       }
       return modeList
     },
+    getNotesFromMode({range = 1} = {}){
+      let notes = []
+      for(let i = 0; i < range; i++){
+        let octaveNotes = this.reduceOctaveToMode({'base': this.octave + i})
+        notes.push(octaveNotes)
+      }
+      return notes.reduce((acc, curVal) => acc.concat(curVal), [])
+    },
     generatePattern(){
-      const notes = this.getNotesFromMode()
-      notes.push(null)
+      let notes = this.getNotesFromMode()
+      // notes.push(null)
       let seq = []
       for (let i = 0; i < this.phraseLength; i++) { // phraseLength: 2, 4, 8, 16, 32, 64 etc.
         let nest = this.rand(3)
@@ -361,11 +362,10 @@ export default {
     },
     rand(max){
       let rnum = Math.floor(Math.random() * (max ? max : 10))
-      // console.log(rnum)
       return rnum
     },
     randNote(notes){
-      return notes[this.rand(notes.length -1)]
+      return notes[this.rand(notes.length)]
     },
     genMotif(){
       // note length pattern: 1n, 2n, 4n, 8n, 16n
