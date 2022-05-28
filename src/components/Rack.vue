@@ -25,7 +25,7 @@
         &nbsp;
         <span>Density:</span>
         <select v-model="phraseDensity">
-          <option v-for="i in 10" :value="i" :key="'depth_'+i">{{ i }}</option>
+          <option v-for="i in 10" :value="i" :key="'density_'+i">{{ i }}</option>
         </select>
       </div>
 
@@ -246,7 +246,7 @@ export default {
     })
     // this.freqLFO.start()
     // this.freqLFO.connect(this.effects.filter.frequency)
-    this.synth.chain(this.effects.delay2, this.effects.reverb, this.effects.filter, Tone.Destination)
+    this.synth.chain(this.effects.delay, this.effects.reverb, this.effects.filter, Tone.Destination)
     // this.synth.chain(this.effects.reverb, this.effects.filter, Tone.Destination)
     // this.synth.chain(this.effects.reverb2, this.effects.delay2, this.effects.filter, Tone.Destination)
 

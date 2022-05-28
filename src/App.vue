@@ -4,13 +4,12 @@
     <h2>Sandbox</h2>
 
     <!-- Layers (start) -->
-    <Rack   v-if="true"  :notes="notes" :modes="modes" :scales="scales" ref="rack"/>
-    <Rack   v-if="true"  :notes="notes" :modes="modes" :scales="scales" ref="rack2"/>
-    <Rack   v-if="true"  :notes="notes" :modes="modes" :scales="scales" ref="rack3"/>
-
-    <Kick   v-if="true"  ref="kick" />
-    <Snare  v-if="true"  ref="snare" />
-    <Hat    v-if="true"  ref="hat" />
+    <Rack  v-if="true"  :notes="notes" :modes="modes" :scales="scales" ref="rack"/>
+    <Rack  v-if="true"  :notes="notes" :modes="modes" :scales="scales" ref="rack2"/>
+    <Rack  v-if="true"  :notes="notes" :modes="modes" :scales="scales" ref="rack3"/>
+    <Kick  v-if="true"  ref="kick" />
+    <Snare v-if="true"  ref="snare" />
+    <Hat   v-if="true"  ref="hat" />
     <!-- Layers (end) -->
 
     <div>
