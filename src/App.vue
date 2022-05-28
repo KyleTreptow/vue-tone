@@ -4,16 +4,13 @@
     <h2>Sandbox</h2>
 
     <!-- Layers (start) -->
-    <Rack    v-if="true"  :notes="notes" :modes="modes" :scales="scales" ref="rack"/>
-    <Rack    v-if="false"  :notes="notes" :modes="modes" :scales="scales" ref="rack2"/>
+    <Rack   v-if="true"  :notes="notes" :modes="modes" :scales="scales" ref="rack"/>
+    <Rack   v-if="true"  :notes="notes" :modes="modes" :scales="scales" ref="rack2"/>
+    <Rack   v-if="true"  :notes="notes" :modes="modes" :scales="scales" ref="rack3"/>
 
-    <High   v-if="false" :notes="notes" :modes="modes" :scales="scales" ref="high"/>
-    <Mid    v-if="false"  :notes="notes" :modes="modes" :scales="scales" ref="mid"/>
-    <Bass   v-if="false"  :notes="notes" :modes="modes" :scales="scales" ref="bass" />
-
-    <Kick   v-if="false"  ref="kick" />
-    <Snare  v-if="false"  ref="snare" />
-    <Hat    v-if="false"  ref="hat" />
+    <Kick   v-if="true"  ref="kick" />
+    <Snare  v-if="true"  ref="snare" />
+    <Hat    v-if="true"  ref="hat" />
     <!-- Layers (end) -->
 
     <div>
@@ -44,18 +41,15 @@
 <script>
 
 import * as Tone from 'tone'
-import High from './components/High.vue'
-import Mid from './components/Mid.vue'
-import Bass from './components/Bass.vue'
+
 import Kick from './components/Kick.vue'
 import Snare from './components/Snare.vue'
 import Hat from './components/Hat.vue'
-
 import Rack from './components/Rack.vue'
 
 export default {
   name: 'App',
-  components: { High, Mid, Bass, Kick, Snare, Hat, Rack },
+  components: { Kick, Snare, Hat, Rack },
   data(){
     return {
       notes: ['C', 'Db', 'D', 'Eb', 'E', 'F', 'Gb', 'G', 'Ab', 'A', 'Bb', 'B'],

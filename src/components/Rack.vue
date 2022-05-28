@@ -3,33 +3,45 @@
     <section>
       <h2>{{ name }}</h2>
       <div class="block">
-        <span>Base Octave: </span>
+        <span>Base: </span>
         <select v-model="octave">
           <option v-for="n in 5" :value="n" :key="n">{{ n }}</option>
         </select>
         &nbsp;
-        <span>Octave Range:</span>
+        <span>Range:</span>
         <select v-model="octaveRange">
           <option v-for="i in 4" :value="i" :key="'range_'+i">{{ i }}</option>
         </select>
         &nbsp;
-        <span>Phrase Length:</span>
+        <span>Length:</span>
         <select v-model="phraseLength">
           <option v-for="n in phraseLengthList" :value="n" :key="n">{{ n }}</option>
+        </select>
+        &nbsp;
+        <span>Depth:</span>
+        <select v-model="phraseDepth">
+          <option v-for="i in 10" :value="i" :key="'depth_'+i">{{ i }}</option>
+        </select>
+        &nbsp;
+        <span>Density:</span>
+        <select v-model="phraseDensity">
+          <option v-for="i in 10" :value="i" :key="'depth_'+i">{{ i }}</option>
         </select>
       </div>
 
       <div class="block">
-        <button v-for="note in octaveTones"
+        <button v-for="note in octaveNotes"
           :key="'note-'+note"
           class="note-item"
           :class="{
-            active: modeTones.includes(note),
-            inactive: !modeTones.includes(note),
-            live: note == liveNote
+            active: modeNotes.includes(note),
+            inactive: !modeNotes.includes(note),
+            live: getNoteTone(note) == getNoteTone(liveNote)
           }"
-          @click="startAudio(note)">{{ note }}</button>
+          @click="startAudio(note)">{{ getNoteTone(note) }}</button>
       </div>
+
+      <div class="block"> Tone: {{ liveNote ? liveTone + ' - ' + liveOct : 'None' }} </div>
 
       <div class="expando">
         <button type="button" @click="displayPatterns = !displayPatterns">Pattern Arrays</button>
@@ -55,6 +67,7 @@
             <h3>Generated Sequence</h3>
             <div>{{ seqArray }}</div>
           </section>
+          <button type="button" @click="generatePattern()">Gen Pattern</button>
         </main>
         <main v-if="paramsActive" class="params">
           <div class="param">
@@ -156,6 +169,8 @@ export default {
       activeMode: 'aeolian',
       phraseLengthList: [2, 4, 8, 16, 32, 64],
       phraseLength: 8,
+      phraseDepth: 3,
+      phraseDensity: 10,
       liveNote: null,
       waveForms: ['sine', 'triangle', 'square', 'sawtooth'],
       seqArray: [],
@@ -201,6 +216,11 @@ export default {
       "delayTime": "8n",
       "feedback": 0.45
     })
+    this.effects.delay2 = new Tone.FeedbackDelay({
+      "wet": 0.35,
+      "delayTime": "16n",
+      "feedback": 0.25
+    })
     this.effects.filter = new Tone.Filter({
       "type" : 'lowpass',
       "frequency" : 6500,
@@ -213,6 +233,11 @@ export default {
       "decay": 1.5,
       "preDelay": 0.01
     })
+    this.effects.reverb2 = new Tone.Reverb({
+      "wet": 0.45,
+      "decay": 2.5,
+      "preDelay": 0.01
+    })
     this.freqLFO = new Tone.LFO({
       type: 'sine',
       min: 0,
@@ -221,14 +246,16 @@ export default {
     })
     // this.freqLFO.start()
     // this.freqLFO.connect(this.effects.filter.frequency)
-    this.synth.chain(this.effects.delay, this.effects.reverb, this.effects.filter, Tone.Destination)
+    this.synth.chain(this.effects.delay2, this.effects.reverb, this.effects.filter, Tone.Destination)
+    // this.synth.chain(this.effects.reverb, this.effects.filter, Tone.Destination)
+    // this.synth.chain(this.effects.reverb2, this.effects.delay2, this.effects.filter, Tone.Destination)
 
     // Ramp Values
     // this.effects.delay.wet.rampTo(1, 3)
 
   },
   computed: {
-    octaveTones(){ // 12 tones from root with Octave #s
+    octaveNotes(){ // 12 tones from root with Octave #s
       let noteList = this.notes
       noteList = noteList.concat(this.notes)
       let keyIndex = noteList.indexOf(this.activeKey)
@@ -237,8 +264,8 @@ export default {
       })
       return noteList.slice(keyIndex, keyIndex+12)
     },
-    modeTones(){
-      let notes = this.octaveTones
+    modeNotes(){
+      let notes = this.octaveNotes
       let modeSteps = this.scales[this.activeMode]
       let modeList = []
       let indexMod = 0
@@ -248,7 +275,11 @@ export default {
         modeList.push(notes[indexMod])
       }
       return modeList
-    }
+    },
+    // Get live note, remove octave and return just tone
+    liveTone(){ return this.liveNote.slice(0, -1) },
+    // Get live note, remove tone and return just octave
+    liveOct(){ return this.liveNote.charAt(this.liveNote.length - 1) }
   },
   methods: {
     ////////////////////////////////////////
@@ -298,6 +329,10 @@ export default {
     randNote(notes){
       return notes[this.rand(notes.length)]
     },
+    // Get live note, remove octave and return just tone
+    getNoteTone(note){ return note ? note.slice(0, -1) : '' },
+    // Get live note, remove tone and return just octave
+    getNoteOct(note){ return note ? note.charAt(note.length - 1) : '' },
     ////////////////////////////////////////
     // 3: Pattern Gen
     ////////////////////////////////////////
@@ -331,8 +366,8 @@ export default {
     getNotesFromMode({range = 1} = {}){
       let notes = []
       for(let i = 0; i < range; i++){
-        let octaveNotes = this.reduceOctaveToMode({'base': this.octave + i})
-        notes.push(octaveNotes)
+        let oNotes = this.reduceOctaveToMode({'base': this.octave + i})
+        notes.push(oNotes)
       }
       return notes.reduce((acc, curVal) => acc.concat(curVal), [])
     },
@@ -340,13 +375,23 @@ export default {
       let notes = this.getNotesFromMode({range: this.octaveRange})
       let seq = []
       for (let i = 0; i < this.phraseLength; i++) { // phraseLength: 2, 4, 8, 16, 32, 64 etc.
-        let nest = this.rand(3)
-        if(nest == 0 || nest == 1){ // Single Note
-          seq.push(this.randNote(notes))
+        let nest = this.rand(10)
+        if(nest > this.phraseDepth){ // Single Note
+          let rest = this.rand(10)
+          if(rest >= this.phraseDensity){
+            seq.push(null)
+          } else {
+            seq.push(this.randNote(notes))
+          }
         } else { // Nested Array
           let seq2 = []
           for (let j = 0; j < 2; j++){
-            seq2.push(this.randNote(notes))
+            let rest2 = this.rand(10)
+            if(rest2 >= this.phraseDensity){
+              seq2.push(null)
+            } else {
+              seq2.push(this.randNote(notes))
+            }
           }
           seq.push(seq2)
         }
@@ -366,7 +411,7 @@ export default {
           s.triggerAttackRelease(note, "10hz", time) // note, release (10hz or 16n?), time
           that.liveNote = note
         },
-        notes, "8n"
+        notes, "4n"
       );
       return synthPart
     },
