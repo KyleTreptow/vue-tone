@@ -2,18 +2,16 @@
   <div class="">
     <section>
 
+      <h2>{{ name }}</h2>
+
       <div class="block">
-        <span><b>{{ name }}: &nbsp; </b></span>
+        <span>Octave: </span> &nbsp;
         <select v-model="octave">
           <option v-for="n in 5" :value="n" :key="n">{{ n }}</option>
         </select>
         &nbsp; <span>Phrase Length:</span> &nbsp;
         <select v-model="phraseLength">
           <option v-for="n in phraseLengthList" :value="n" :key="n">{{ n }}</option>
-        </select>
-        &nbsp; <span>Note Length:</span> &nbsp;
-        <select v-model="noteLength">
-          <option v-for="n in noteLengthList" :value="n" :key="n">{{ n }}</option>
         </select>
       </div>
 
@@ -29,119 +27,25 @@
           @click="startAudio(note)">{{ note }}</button>
       </div>
 
-      <div class="testing">
-        <div class="">
-          <h5>Octave from Root</h5>
-          {{ getOctaveFromRoot() }}
-        </div>
-        <div class="">
-          <h5>Mode Tones</h5>
-          {{ reduceOctaveToMode() }}
-        </div>
-        <div class="">
-          <h5>Mult Oct</h5>
-          {{ getNotesFromMode({range: 2}) }}
-        </div>
-        <div class="">
-          <h5>SEQUENCE</h5>
-          {{ seqArray }}
-        </div>
-      </div>
+      <main class="testing">
+        <section>
+          <h3>Octave Starting at C</h3>
+          <div>{{ getOctaveFromC() }}</div>
+        </section>
+        <section>
+          <h3>Octave Starting at Root</h3>
+          <div>{{ getOctaveFromRoot() }}</div>
+        </section>
+        <section>
+          <h3>Sequence!</h3>
+          <div>{{ seqArray }}</div>
+        </section>
+      </main>
 
 
+      <!-- Synth Params Here (in temp code) -->
 
-      <button type="button" @click="createSequence()">Create Sequence</button>
 
-      <button type="button" @click="paramsActive = !paramsActive">Synth Parameters</button>
-
-      <div class="params" v-if="paramsActive">
-        <main>
-          <div class="param">
-            <h4 class="param__header">Oscillator</h4>
-            <div class="control">
-              <h4>
-                <span>Volume:</span>
-                <span>{{ params.volume }} dB</span>
-              </h4>
-              <input type="range" min="-24" max="24"
-               v-model="params.volume"
-               @change="synth.volume.value = params.volume">
-            </div>
-
-            <div class="control">
-              <h4>
-                <span>Portamento:</span>
-                <span>{{ params.portamento }}</span>
-              </h4>
-              <input type="range" min="0.00" max="0.10" step="0.01"
-               v-model="params.portamento"
-               @change="synth.portamento = params.portamento">
-            </div>
-
-            <div class="control">
-              <h4>
-                <span>Phase:</span>
-                <span>{{ params.oscillator.phase }} deg</span>
-              </h4>
-              <input type="range" min="0" max="360"
-               v-model="params.oscillator.phase">
-            </div>
-
-            <div class="control control--select">
-              <h4>
-                <span>Waveform:</span>
-              </h4>
-              <select v-model="params.oscillator.type">
-                <option v-for="wf in waveForms" :value="wf" :key="wf">{{ wf }}</option>
-              </select>
-            </div>
-
-          </div>
-          <div class="param">
-            <h4>Envelope</h4>
-
-            <div class="control">
-              <h4>
-                <span>Attack: </span>
-                <span>{{ params.envelope.attack }}</span>
-              </h4>
-              <input type="range" min="0.01" max="2.00" step="0.01"
-               v-model="params.envelope.attack">
-            </div>
-
-            <div class="control">
-              <h4>
-                <span>Decay: </span>
-                <span>{{ params.envelope.decay }}</span>
-              </h4>
-              <input type="range" min="0.01" max="2.00" step="0.01"
-               v-model="params.envelope.decay">
-            </div>
-
-            <div class="control">
-              <h4>
-                <span>Sustain:</span>
-                <span>{{ params.envelope.sustain }}</span>
-              </h4>
-              <input type="range" min="0" max="1" step="0.01"
-               v-model="params.envelope.sustain">
-            </div>
-
-            <div class="control">
-              <h4>
-                <span>Release:</span>
-                <span>{{ params.envelope.release }}</span>
-              </h4>
-              <input type="range" min="0.01" max="2.00" step="0.01"
-               v-model="params.envelope.release">
-            </div>
-
-          </div>
-        </main>
-        <footer>
-          <!-- <button type="button" @click="log(synth)">Log Synth</button> -->
-        </footer>
-      </div>
 
   </section>
   </div>
@@ -154,15 +58,13 @@ export default {
   props: ['notes', 'modes', 'scales'],
   data(){
     return {
-      name: 'Rack',
+      name: 'Instrument Rack',
       synth: null,
       activeKey: 'C',
       octave: 3,
       activeMode: 'aeolian',
       phraseLengthList: [2, 4, 8, 16, 32, 64],
       phraseLength: 8,
-      noteLengthList: ['1n', '2n', '4n', '8n', '16n'],
-      noteLength: "8n",
       liveNote: null,
       waveForms: ['sine', 'triangle', 'square', 'sawtooth'],
       seqArray: [],
@@ -257,9 +159,16 @@ export default {
     }
   },
   methods: {
-    // ROUTING
+    ////////////////////////////////////////
+    // 0: Audio Context
+    ////////////////////////////////////////
+    startAudio(note) {
+      this.synth.triggerAttackRelease(note, "4n")
+    },
+    ////////////////////////////////////////
+    // 1: Module Routing
+    ////////////////////////////////////////
     disconnect(){
-      // console.log(this.effects)
       for(let e of this.effectsList){
         if(this.effects.length){
           this.effects[e].disconnect()
@@ -271,7 +180,6 @@ export default {
       let fx = this.activeEffects.map(x => this.effects[x])
       fx.push(Tone.Destination)
       this.synth.chain(...fx)
-      // console.log(fx)
     },
     activateEffect(item){
       this.activeEffects.push(item)
@@ -288,32 +196,27 @@ export default {
       this.disconnect()
       this.connect()
     },
-    // MUSIC GEN
-    startAudio(note) {
-      this.synth.triggerAttackRelease(note, "4n")
+    ////////////////////////////////////////
+    // 2: Utils
+    ////////////////////////////////////////
+    rand(max){
+      let rnum = Math.floor(Math.random() * (max ? max : 10))
+      return rnum
     },
-    createSequence(){ // creates a Tone sequence from pattern of notes
-      let that = this
-      let s = this.synth
-      let notes = this.generatePattern()
-      let synthPart = new Tone.Sequence(
-        function(time, note) {
-          s.triggerAttackRelease(note, "10hz", time) // note, release (10hz or 16n?), time
-          that.liveNote = note
-        },
-        notes, "8n"
-      );
-      return synthPart
+    randNote(notes){
+      return notes[this.rand(notes.length)]
     },
-    // Pattern Gen
-    getOctaveFromC({base = this.octave, range = 1, nums = true} = {}){
+    ////////////////////////////////////////
+    // 3: Pattern Gen
+    ////////////////////////////////////////
+    getOctaveFromC({base = this.octave, range = 1} = {}){
       let noteList = []
-      console.log(base, range, nums)
       for(let i = 0; i < range; i++){
         noteList = noteList.concat(this.notes)
       }
-      noteList = noteList.map((n, i) => {
-        return n + (i < 12 ? this.octave : this.octave +1)
+      noteList = noteList.map((n) => {
+        // return n + (i < 12 ? base : base +1)
+        return n + base
       })
       return noteList
     },
@@ -361,18 +264,25 @@ export default {
       this.seqArray = seq
       return seq
     },
-    rand(max){
-      let rnum = Math.floor(Math.random() * (max ? max : 10))
-      return rnum
+    ////////////////////////////////////////
+    // 4: Tone Sequence
+    ////////////////////////////////////////
+    createSequence(){ // creates a Tone sequence from pattern of notes
+      let that = this
+      let s = this.synth
+      let notes = this.generatePattern()
+      let synthPart = new Tone.Sequence(
+        function(time, note) {
+          s.triggerAttackRelease(note, "10hz", time) // note, release (10hz or 16n?), time
+          that.liveNote = note
+        },
+        notes, "8n"
+      );
+      return synthPart
     },
-    randNote(notes){
-      return notes[this.rand(notes.length)]
-    },
-    genMotif(){
-      // note length pattern: 1n, 2n, 4n, 8n, 16n
-      // note intervals: [1 (root), 5] [ 2, 7, 3] [4, 6]
-    },
-    // DEV
+    ////////////////////////////////////////
+    // 5: Debug
+    ////////////////////////////////////////
     log(data){
       console.log(data)
     }
@@ -404,6 +314,9 @@ export default {
     margin-bottom: 10px
     border-radius: 6px
     border: solid 1px #ddd
+    > h2
+      margin: 0 0 10px 0
+      padding: 0
   ul
     list-style-type: none
     padding: 0
@@ -553,7 +466,23 @@ export default {
         padding: 0 8px
 
   .testing
-    h5
-      margin: 0 0 6px 0
+    border: solid 1px #ddd
+    padding: 5px
+    background-color: #eee
+    section
+      display: block
+      background-color: #fff
+      margin-bottom: 5px
+      border: solid 1px #ddd
+      border-radius: 6px
+      font-size: 12px
+      &:last-child
+        margin-bottom: 0
+      h3
+        color: #359368
+        font-size: 12px
+        font-weight: bold
+        margin: 0 0 3px 0
+        padding: 0
 
 </style>
