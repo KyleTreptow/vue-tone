@@ -1,15 +1,19 @@
 <template>
   <div class="">
     <section>
-
       <h2>{{ name }}</h2>
-
       <div class="block">
-        <span>Octave: </span> &nbsp;
+        <span>Base Octave: </span>
         <select v-model="octave">
           <option v-for="n in 5" :value="n" :key="n">{{ n }}</option>
         </select>
-        &nbsp; <span>Phrase Length:</span> &nbsp;
+        &nbsp;
+        <span>Octave Range:</span>
+        <select v-model="octaveRange">
+          <option v-for="i in 4" :value="i" :key="'range_'+i">{{ i }}</option>
+        </select>
+        &nbsp;
+        <span>Phrase Length:</span>
         <select v-model="phraseLength">
           <option v-for="n in phraseLengthList" :value="n" :key="n">{{ n }}</option>
         </select>
@@ -27,20 +31,106 @@
           @click="startAudio(note)">{{ note }}</button>
       </div>
 
-      <main class="testing">
-        <section>
-          <h3>Octave Starting at C</h3>
-          <div>{{ getOctaveFromC() }}</div>
-        </section>
-        <section>
-          <h3>Octave Starting at Root</h3>
-          <div>{{ getOctaveFromRoot() }}</div>
-        </section>
-        <section>
-          <h3>Sequence!</h3>
-          <div>{{ seqArray }}</div>
-        </section>
-      </main>
+      <div class="expando">
+        <button type="button" @click="displayPatterns = !displayPatterns">Pattern Arrays</button>
+        <button type="button" @click="paramsActive = !paramsActive">Synth Parameters</button>
+        <main v-if="displayPatterns" class="pattern-arrays">
+          <section>
+            <h3>Octave Starting at C</h3>
+            <div>{{ getOctaveFromC() }}</div>
+          </section>
+          <section>
+            <h3>Octave Starting at Root</h3>
+            <div>{{ getOctaveFromRoot() }}</div>
+          </section>
+          <section>
+            <h3>Reduce Octave to Mode Tones</h3>
+            <div>{{ reduceOctaveToMode() }}</div>
+          </section>
+          <section>
+            <h3>Get Notes From Mode - 2 Octave Range</h3>
+            <div>{{ getNotesFromMode({range: 2}) }}</div>
+          </section>
+          <section>
+            <h3>Generated Sequence</h3>
+            <div>{{ seqArray }}</div>
+          </section>
+        </main>
+        <main v-if="paramsActive" class="params">
+          <div class="param">
+            <h4 class="param__header">Oscillator</h4>
+            <div class="control">
+              <h4>
+                <span>Volume:</span>
+                <span>{{ params.volume }} dB</span>
+              </h4>
+              <input type="range" min="-24" max="24"
+               v-model="params.volume"
+               @change="synth.volume.value = params.volume">
+            </div>
+            <div class="control">
+              <h4>
+                <span>Portamento:</span>
+                <span>{{ params.portamento }}</span>
+              </h4>
+              <input type="range" min="0.00" max="0.10" step="0.01"
+               v-model="params.portamento"
+               @change="synth.portamento = params.portamento">
+            </div>
+            <div class="control">
+              <h4>
+                <span>Phase:</span>
+                <span>{{ params.oscillator.phase }} deg</span>
+              </h4>
+              <input type="range" min="0" max="360"
+               v-model="params.oscillator.phase">
+            </div>
+            <div class="control control--select">
+              <h4>
+                <span>Waveform:</span>
+              </h4>
+              <select v-model="params.oscillator.type">
+                <option v-for="wf in waveForms" :value="wf" :key="wf">{{ wf }}</option>
+              </select>
+            </div>
+          </div>
+          <div class="param">
+            <h4>Envelope</h4>
+            <div class="control">
+              <h4>
+                <span>Attack: </span>
+                <span>{{ params.envelope.attack }}</span>
+              </h4>
+              <input type="range" min="0.01" max="2.00" step="0.01"
+               v-model="params.envelope.attack">
+            </div>
+            <div class="control">
+              <h4>
+                <span>Decay: </span>
+                <span>{{ params.envelope.decay }}</span>
+              </h4>
+              <input type="range" min="0.01" max="2.00" step="0.01"
+               v-model="params.envelope.decay">
+            </div>
+            <div class="control">
+              <h4>
+                <span>Sustain:</span>
+                <span>{{ params.envelope.sustain }}</span>
+              </h4>
+              <input type="range" min="0" max="1" step="0.01"
+               v-model="params.envelope.sustain">
+            </div>
+            <div class="control">
+              <h4>
+                <span>Release:</span>
+                <span>{{ params.envelope.release }}</span>
+              </h4>
+              <input type="range" min="0.01" max="2.00" step="0.01"
+               v-model="params.envelope.release">
+            </div>
+          </div>
+        </main>
+      </div>
 
 
       <!-- Synth Params Here (in temp code) -->
@@ -62,12 +152,14 @@ export default {
       synth: null,
       activeKey: 'C',
       octave: 3,
+      octaveRange: 1,
       activeMode: 'aeolian',
       phraseLengthList: [2, 4, 8, 16, 32, 64],
       phraseLength: 8,
       liveNote: null,
       waveForms: ['sine', 'triangle', 'square', 'sawtooth'],
       seqArray: [],
+      displayPatterns: false,
       paramsActive: false,
       params: {
         "volume": -10,
@@ -214,14 +306,13 @@ export default {
       for(let i = 0; i < range; i++){
         noteList = noteList.concat(this.notes)
       }
-      noteList = noteList.map((n) => {
-        // return n + (i < 12 ? base : base +1)
-        return n + base
+      noteList = noteList.map((n, i) => {
+        return n + (i < 12 ? base : base +1)
       })
       return noteList
     },
-    getOctaveFromRoot({base = this.octave, range = 1, nums = true} = {}){
-      const notes = this.getOctaveFromC({ 'base': base, 'range': range + 1, 'nums': nums })
+    getOctaveFromRoot({base = this.octave, range = 1} = {}){
+      const notes = this.getOctaveFromC({ 'base': base, 'range': range + 1 })
       let keyIndex = notes.indexOf(this.activeKey + base)
       return notes.slice(keyIndex, keyIndex + (12 * range))
     },
@@ -246,8 +337,7 @@ export default {
       return notes.reduce((acc, curVal) => acc.concat(curVal), [])
     },
     generatePattern(){
-      let notes = this.getNotesFromMode()
-      // notes.push(null)
+      let notes = this.getNotesFromMode({range: this.octaveRange})
       let seq = []
       for (let i = 0; i < this.phraseLength; i++) { // phraseLength: 2, 4, 8, 16, 32, 64 etc.
         let nest = this.rand(3)
@@ -387,17 +477,12 @@ export default {
     border: solid 1px #eee
     background-color: #fafafa
     border-radius: 3px
-    display: block
-    width: 600px
+    display: grid
+    grid-template-columns: 1fr 1fr
     max-width: 100%
     margin: auto
     h4
       margin: 0
-    main
-      display: grid
-      grid-template-columns: 1fr 1fr
-    footer
-      display: block
 
   .param
     padding-top: 10px
@@ -465,24 +550,25 @@ export default {
       select
         padding: 0 8px
 
-  .testing
+  .expando
     border: solid 1px #ddd
     padding: 5px
     background-color: #eee
-    section
-      display: block
-      background-color: #fff
-      margin-bottom: 5px
-      border: solid 1px #ddd
-      border-radius: 6px
-      font-size: 12px
-      &:last-child
-        margin-bottom: 0
-      h3
-        color: #359368
+    main.pattern-arrays
+      section
+        display: block
+        background-color: #fff
+        margin-bottom: 5px
+        border: solid 1px #ddd
+        border-radius: 6px
         font-size: 12px
-        font-weight: bold
-        margin: 0 0 3px 0
-        padding: 0
+        &:last-child
+          margin-bottom: 0
+        h3
+          color: #359368
+          font-size: 12px
+          font-weight: bold
+          margin: 0 0 3px 0
+          padding: 0
 
 </style>
