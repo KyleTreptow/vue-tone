@@ -204,7 +204,7 @@ export default {
     this.synth = new Tone.Synth(this.params)
     this.effects.delay = new Tone.FeedbackDelay({
       "wet": 0.6,
-      "delayTime": "16n",
+      "delayTime": "8n",
       "feedback": 0.45
     })
     this.effects.filter = new Tone.Filter({
